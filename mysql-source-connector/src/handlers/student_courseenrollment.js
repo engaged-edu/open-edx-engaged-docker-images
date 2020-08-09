@@ -23,20 +23,12 @@ const student_courseenrollment = async (event) => {
                     affectedRows.forEach((affectedRow) => {
                         for (let i = 0; i < results.length; i++) {
                             const student = { ...results[i] };
-                            console.log(
-                                student,
-                                student.id,
-                                affectedRow.after.user_id
-                            );
                             if (student.id === affectedRow.after.user_id) {
                                 affectedRow.after_student = student;
                                 break;
                             }
                         }
                     });
-                    console.log(
-                        JSON.stringify({ ...event, affectedRows }, null, 2)
-                    );
                     const eventToSend = {
                         Time: new Date(),
                         EventBusName: process.env.BUS_NAME,
