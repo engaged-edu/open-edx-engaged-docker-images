@@ -1,0 +1,15 @@
+version: "3.2"
+services:
+  node:
+    container_name: node-watcher
+    build: ./
+    restart: always
+    env_file: docker-compose.env
+    networks:
+      - my-bridge-network
+    volumes:
+      - ./src/data:/var/lib/app-data
+
+networks:
+  my-bridge-network:
+    external: true
