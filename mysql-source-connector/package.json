@@ -11,19 +11,19 @@
     "author": "Gustavo Santos",
     "license": "ISC",
     "devDependencies": {
-        "eslint": "^7.5.0",
-        "eslint-config-airbnb-base": "^14.2.0",
-        "eslint-plugin-import": "^2.22.0",
-        "nodemon": "^2.0.4"
+        "eslint": "7.5.0",
+        "eslint-config-airbnb-base": "14.2.0",
+        "eslint-plugin-import": "2.22.0",
+        "nodemon": "2.0.4"
     },
     "dependencies": {
-        "@rodrigogs/mysql-events": "^0.6.0",
-        "aws-sdk": "^2.723.0",
-        "bluebird": "^3.7.2",
-        "dotenv": "^8.2.0",
-        "lowdb": "^1.0.0",
-        "mysql": "^2.18.1",
-        "rotating-file-stream": "^2.1.3",
-        "zongji": "^0.5.1"
+        "@rodrigogs/mysql-events": "0.6.0",
+        "aws-sdk": "2.723.0",
+        "bluebird": "3.7.2",
+        "dotenv": "8.2.0",
+        "lowdb": "1.0.0",
+        "mysql": "2.18.1",
+        "rotating-file-stream": "2.1.3",
+        "zongji": "0.5.1"
     }
 }
