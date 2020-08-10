@@ -46,7 +46,6 @@ const program = async () => {
         host: process.env.DATABASE_HOST,
         user: process.env.DATABASE_USER,
         password: process.env.DATABASE_USER_PASSWORD,
-        timeout: 1000000000,
     });
     // Configurações da instancia
     const instance = new MySQLEvents(connection, zongJiConfig);
