@@ -1,3 +1,4 @@
+# engagedu/open-edx-mysql
 FROM mysql:5.6.36
 # Copies the configuration file.
 COPY ./my.cnf /etc/mysql/my.cnf
