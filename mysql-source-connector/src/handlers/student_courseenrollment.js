@@ -31,10 +31,18 @@ const student_courseenrollment = async (event) => {
                     });
                     const eventToSend = {
                         Time: new Date(),
-                        EventBusName: process.env.BUS_NAME,
-                        Source: process.env.SOURCE,
-                        DetailType: process.env.DETAIL_TYPE,
-                        Detail: JSON.stringify({ ...event, affectedRows }),
+                        EventBusName:
+                            process.env.ENGAGED_AWS_EVENTBRIDGE_BUS_NAME,
+                        Source: process.env.ENGAGED_AWS_EVENTBRIDGE_SOURCE_NAME,
+                        DetailType: `${
+                            event.table
+                        }:${event.type.toLowerCase()}`,
+                        Detail: JSON.stringify({
+                            ...event,
+                            affectedRows,
+                            server_identifier:
+                                process.env.ENGAGED_SERVER_IDENTIFIER,
+                        }),
                     };
                     // Envia o evento
                     console.log(
