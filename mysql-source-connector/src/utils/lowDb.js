@@ -15,7 +15,7 @@ const startLowDb = () => {
                 "db.json"
             );
         } else {
-            pathToFile = path.join(__dirname, "data", "db.json");
+            pathToFile = path.join(__dirname, "..", "data", "db.json");
         }
         const adapter = new FileSync(pathToFile);
         const db = low(adapter);
