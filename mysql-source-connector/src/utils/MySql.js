@@ -1,11 +1,22 @@
-var mysql = require("mysql");
-var connection = mysql.createConnection({
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_USER_PASSWORD,
-    database: "openedx",
-});
+const mysql = require("mysql");
 
-connection.connect();
-
-module.exports = connection;
+exports.connectToMySQL = () => {
+    return new Promise((resolve, reject) => {
+        try {
+            const connection = mysql.createConnection({
+                host: process.env.DATABASE_HOST,
+                user: process.env.DATABASE_USER,
+                password: process.env.DATABASE_USER_PASSWORD,
+                database: "openedx",
+            });
+            connection.connect((connectionError) => {
+                if (connectionError) {
+                    return reject(connectionError);
+                }
+                return resolve(connection);
+            });
+        } catch (dbError) {
+            return reject(dbError);
+        }
+    });
+};

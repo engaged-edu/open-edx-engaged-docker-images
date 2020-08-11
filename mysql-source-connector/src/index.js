@@ -10,10 +10,28 @@ const handler = require("./queueHandler");
 const startLog = require("./utils/logger");
 // COnexao com mysql
 const connection = require("../utils/MySql");
+// Classe para manipulação do eventbridge
+const CustomEventBridge = require("./utils/customEventBridge")({
+    region: process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_REGION,
+    accessKeyId: process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_ACCESS_KEY,
+    secretAccessKey: process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_SECRET_KEY,
+});
+// handlers
+const handler = require("./queueHandler");
+const {
+    studentCourseEnrollmentFactory,
+} = require("./handlers/student_courseenrollment");
+const {
+    coursewareStudentModuleFactory,
+} = require("./handlers/courseware_studentmodule");
 
 const program = async () => {
+    const connection = await connectToMySQL();
     // Inicia o banco de dados local
     const db = startLowDb();
+    if (!db) {
+        Promise.reject("Erro ao iniciar o banco de dados local.");
+    }
     // Configuração default da lib de eventos do banco de dados.
     let zongJiConfig = {
         startAtEnd: false,
@@ -62,6 +80,18 @@ const program = async () => {
  * Metodo que inicia o loop infinito que fica manipulando a fila de eventos local.
  */
 const startLoop = async () => {
+    const { student_courseenrollment } = studentCourseEnrollmentFactory({
+        connection,
+        CustomEventBridge,
+    });
+    const { courseware_studentmodule } = coursewareStudentModuleFactory({
+        connection,
+        CustomEventBridge,
+    });
+    const { handler } = queueHandlerFactory({
+        student_courseenrollment,
+        courseware_studentmodule,
+    });
     for (;;) {
         await handler(db);
     }
@@ -76,4 +106,4 @@ program()
     .then(() =>
         console.log(new Date(), "Aguardando eventos do banco de dados.")
     )
-    .catch((err) => console.error(new Date(), "program", err));
+    .catch((err) => console.error(new Date(), "Program error", err));

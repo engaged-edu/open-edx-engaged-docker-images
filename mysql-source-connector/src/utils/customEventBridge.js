@@ -2,14 +2,8 @@ const AWS = require("aws-sdk");
 const { saveFailedEvents } = require("./lowDb");
 
 class CustomEventBridge {
-    constructor() {
-        AWS.config.update({
-            region: process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_REGION,
-            accessKeyId:
-                process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_ACCESS_KEY,
-            secretAccessKey:
-                process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_SECRET_KEY,
-        });
+    constructor({ region, accessKeyId, secretAccessKey }) {
+        AWS.config.update({ region, accessKeyId, secretAccessKey });
         this.eventbridge = new AWS.EventBridge();
     }
 
@@ -31,4 +25,6 @@ class CustomEventBridge {
     }
 }
 
-module.exports = new CustomEventBridge();
+module.exports = (
+    credentials = { region: "", accessKeyId: "", secretAccessKey: "" }
+) => new CustomEventBridge(credentials);
