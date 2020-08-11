@@ -22,7 +22,9 @@ exports.studentCourseEnrollmentFactory = ({
                         }
                         if (results && results.length > 0) {
                             const students = {};
-                            for (const { ...student } in results) {
+                            results = results.map((r) => ({ ...r }));
+                            for (const i in results) {
+                                const student = results[i];
                                 students[student.id] = student;
                             }
                             // Distribui em cada affectedrow seu aluno correspondente
