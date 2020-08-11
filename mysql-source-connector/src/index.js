@@ -4,12 +4,10 @@ const MySQLEvents = require("@rodrigogs/mysql-events");
 const { startLowDb } = require("./utils/lowDb");
 // Triggers customizadas
 const main = require("./triggers/main");
-// handler da fila.
-const handler = require("./queueHandler");
 // Logger
 const startLog = require("./utils/logger");
 // COnexao com mysql
-const connection = require("../utils/MySql");
+const { connectToMySQL } = require("./utils/MySql");
 // Classe para manipulação do eventbridge
 const CustomEventBridge = require("./utils/customEventBridge")({
     region: process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_REGION,
@@ -17,7 +15,7 @@ const CustomEventBridge = require("./utils/customEventBridge")({
     secretAccessKey: process.env.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_SECRET_KEY,
 });
 // handlers
-const handler = require("./queueHandler");
+const { queueHandlerFactory } = require("./queueHandler");
 const {
     studentCourseEnrollmentFactory,
 } = require("./handlers/student_courseenrollment");
@@ -61,12 +59,6 @@ const program = async () => {
     }
     // Configurações da instancia
     const instance = new MySQLEvents(connection, zongJiConfig);
-    // Inicializa a instancia.
-    await instance.start();
-    // Adiciona triggers customizadas.
-    instance.addTrigger(main(db));
-    // Inicia loop de manipulação da lista de eventos.
-    startLoop();
     // Eventos do banco.
     instance.on(MySQLEvents.EVENTS.CONNECTION_ERROR, (err) =>
         console.error(new Date(), "MySQLEvents.EVENTS.CONNECTION_ERROR", err)
@@ -74,12 +66,18 @@ const program = async () => {
     instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, (err) =>
         console.error(new Date(), "MySQLEvents.EVENTS.ZONGJI_ERROR", err)
     );
+    // Inicializa a instancia.
+    await instance.start();
+    // Adiciona triggers customizadas.
+    instance.addTrigger(main(db));
+    // Inicia loop de manipulação da lista de eventos.
+    startLoop(connection, db);
 };
 
 /**
  * Metodo que inicia o loop infinito que fica manipulando a fila de eventos local.
  */
-const startLoop = async () => {
+const startLoop = async (connection, db) => {
     const { student_courseenrollment } = studentCourseEnrollmentFactory({
         connection,
         CustomEventBridge,
