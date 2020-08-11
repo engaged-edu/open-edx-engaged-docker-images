@@ -7,7 +7,11 @@ const trigger = (db) => ({
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => {
         try {
-            console.log(new Date(), "main > trigger > Evento: ", event);
+            console.log(
+                new Date(),
+                "main > trigger > Evento: ",
+                JSON.stringify(event, null, 2)
+            );
             // Salva o evento na fila no banco local.
             db.get("queue").push(event).write();
             const { nextPosition, binlogName } = event;
