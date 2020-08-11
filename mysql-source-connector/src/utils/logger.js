@@ -9,13 +9,24 @@ const startLog = () => {
     try {
         const pad = (num) => (num > 9 ? "" : "0") + num;
         const generator = (time, index) => {
-            var pathToFile = path.join(
-                __dirname,
-                "..",
-                "data",
-                "logs",
-                "node-watcher.log"
-            );
+            var pathToFile;
+            if (process.env.NODE_ENV === "production") {
+                pathToFile = path.join(
+                    path.parse(process.cwd()).root,
+                    "var",
+                    "lib",
+                    "app-data",
+                    "node-watcher.log"
+                );
+            } else {
+                pathToFile = path.join(
+                    __dirname,
+                    "..",
+                    "data",
+                    "logs",
+                    "node-watcher.log"
+                );
+            }
             if (!time) return pathToFile;
 
             var month = time.getFullYear() + "" + pad(time.getMonth() + 1);
@@ -25,12 +36,11 @@ const startLog = () => {
 
             pathToFile = path.join(
                 __dirname,
+                "..",
                 "data",
-                month,
+                "logs",
                 `${day}_${month}-${hour}_${minute}-${index}.log`
             );
-
-            console.log(pathToFile);
 
             return pathToFile;
         };
@@ -42,6 +52,7 @@ const startLog = () => {
         return logger;
     } catch (error) {
         console.log(new Date(), error);
+        return console;
     }
 };
 

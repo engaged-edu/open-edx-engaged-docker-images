@@ -5,15 +5,18 @@ const trigger = (db) => ({
     name: "openedx",
     expression: "*",
     statement: MySQLEvents.STATEMENTS.ALL,
-    onEvent: async (event) => {
+    onEvent: (event) => {
         try {
             console.log(new Date(), "main > trigger > Evento: ", event);
             // Salva o evento na fila no banco local.
             db.get("queue").push(event).write();
+            const { nextPosition, binlogName } = event;
+            // Salvar a posição do log
+            saveDbState(db, nextPosition, binlogName);
         } catch (error) {
             console.log(new Date(), "main > trigger > ", error);
         }
     },
 });
 
-module.exports = (db) => trigger(db);
+module.exports = trigger;

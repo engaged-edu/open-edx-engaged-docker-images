@@ -1,24 +1,24 @@
 require("dotenv").config();
 const mysql = require("mysql");
 const MySQLEvents = require("@rodrigogs/mysql-events");
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const path = require("path");
-const adapter = new FileSync(path.join(__dirname, "data", "db.json"));
-const db = low(adapter);
+const { startLowDb } = require("./utils/lowDb");
 // Triggers customizadas
 const main = require("./triggers/main");
+// handler da fila.
 const handler = require("./queueHandler");
+// Logger
 const startLog = require("./utils/logger");
-
-console.log(process.env.NODE_ENV);
+// COnexao com mysql
+const connection = require("../utils/MySql");
 
 const program = async () => {
+    // Inicia o banco de dados local
+    const db = startLowDb();
     // Configuração default da lib de eventos do banco de dados.
     let zongJiConfig = {
         startAtEnd: false,
-        excludedSchemas: {
-            mysql: true,
+        includeSchema: {
+            openedx: ["student_courseenrollment", "courseware_studentmodule"],
         },
     };
     // Resgata os valores de configuração no banco de dados local.
@@ -41,12 +41,6 @@ const program = async () => {
             binlogNextPos: config.nextPosition,
         };
     }
-    // INicializa conexão com o mysql do edX
-    const connection = mysql.createConnection({
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_USER_PASSWORD,
-    });
     // Configurações da instancia
     const instance = new MySQLEvents(connection, zongJiConfig);
     // Inicializa a instancia.

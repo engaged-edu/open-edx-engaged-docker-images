@@ -14,16 +14,12 @@ const handler = async (db) => {
     const headEvent = db.get("queue").value()[0];
     // Valida se tem algum conteudo no evento
     if (headEvent) {
-        await Promise.delay(500);
         // Manipula o evento
         handleEvent(headEvent);
         // Pega a fila atualizada retirando o elemento manipulado (primeiro)
         const queue = db.get("queue").value().slice(1);
         // Atualiza no banco de dados local
         db.set("queue", queue).write();
-        const { nextPosition, binlogName } = headEvent;
-        // Salvar a posição do log
-        saveDbState(db, nextPosition, binlogName);
     }
 };
 
@@ -59,4 +55,4 @@ const setImmediatePromise = () => {
     });
 };
 
-module.exports = (db) => handler(db);
+module.exports = handler;

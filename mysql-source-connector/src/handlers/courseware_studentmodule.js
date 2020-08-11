@@ -19,15 +19,14 @@ const courseware_studentmodule = async (event) => {
                     return;
                 }
                 if (results && results.length > 0) {
+                    const students = {};
+                    for (const { ...student } in results) {
+                        students[student.id] = student;
+                    }
                     // Distribui em cada affectedrow seu aluno correspondente
                     affectedRows.forEach((affectedRow) => {
-                        for (let i = 0; i < results.length; i++) {
-                            const student = { ...results[i] };
-                            if (student.id === affectedRow.after.student_id) {
-                                affectedRow.after_student = student;
-                                break;
-                            }
-                        }
+                        affectedRow.after_student =
+                            students[affectedRow.after.student_id];
                     });
                     const eventToSend = {
                         Time: new Date(),

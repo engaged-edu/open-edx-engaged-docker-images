@@ -1,3 +1,31 @@
+const low = require("lowdb");
+const FileSync = require("lowdb/adapters/FileSync");
+const path = require("path");
+
+const startLowDb = () => {
+    let response = false;
+    try {
+        var pathToFile;
+        if (process.env.NODE_ENV === "production") {
+            pathToFile = path.join(
+                path.parse(process.cwd()).root,
+                "var",
+                "lib",
+                "app-data",
+                "db.json"
+            );
+        } else {
+            pathToFile = path.join(__dirname, "data", "db.json");
+        }
+        const adapter = new FileSync(pathToFile);
+        const db = low(adapter);
+        response = db;
+    } catch (error) {
+        console.log(new Date(), "lowdb > saveDbState", error);
+    }
+    return response;
+};
+
 /**
  * Metodo para salvar o estado de leitura do banco de dados (MySql).
  *
@@ -27,4 +55,4 @@ const saveFailedEvents = (event, db) => {
     }
 };
 
-module.exports = { saveDbState, saveFailedEvents };
+module.exports = { saveDbState, saveFailedEvents, startLowDb };
