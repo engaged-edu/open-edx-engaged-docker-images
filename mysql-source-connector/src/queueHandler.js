@@ -42,17 +42,23 @@ exports.queueHandlerFactory = ({
      * @param {*} event Evento do banco de dados
      */
     const handleEvent = (event) => {
-        // Valida se existe algum manipulador para aquela tabela que teve um evento
-        if (eventHandlers[`${event.table}`]) {
-            // Se existir, executa a ação especifica daquela tabela
-            eventHandlers[`${event.table}`](event);
-        } else {
-            // Se nao, informa no log que nao tem manipulador para a tabela que teve o evento.
-            console.log(
-                new Date(),
-                "queueHandler > handleEvent",
-                `Nenhum handler informado para a tabela '${event.table}'`
-            );
+        try {
+            // Valida se existe algum manipulador para aquela tabela que teve um evento
+            if (eventHandlers[`${event.table}`]) {
+                // Se existir, executa a ação especifica daquela tabela
+                eventHandlers[`${event.table}`](event).catch((error) =>
+                    console.log(new Date(), "Erro ao manipular evento", error)
+                );
+            } else {
+                // Se nao, informa no log que nao tem manipulador para a tabela que teve o evento.
+                console.log(
+                    new Date(),
+                    "queueHandler > handleEvent",
+                    `Nenhum handler informado para a tabela '${event.table}'`
+                );
+            }
+        } catch (error) {
+            console.log(new Date(), "Erro ao manipular evento", error);
         }
     };
 
