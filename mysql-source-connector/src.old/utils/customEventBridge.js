@@ -14,8 +14,8 @@ class CustomEventBridge {
                     Entries: [event],
                 })
                 .promise();
-            if (res.FailedEntryCount && res.FailedEntryCount > 0) {
-                saveFailedEvents(event);
+            if(!res || res.FailedEntryCount !== 0 || !Array.isArray(res.Entries) || res.Entries.length !== 1) {
+                saveFailedEvents({ event, res });
             }
             return res;
         } catch (error) {

@@ -1,4 +1,5 @@
 const Promise = require("bluebird");
+const { saveFailedEvents } = require("./utils/lowDb");
 
 const setImmediatePromise = () => {
     return new Promise((resolve) => {
@@ -28,7 +29,7 @@ exports.queueHandlerFactory = ({
         // Valida se tem algum conteudo no evento
         if (headEvent) {
             // Manipula o evento
-            handleEvent(headEvent);
+            await handleEvent(headEvent, db);
             // Pega a fila atualizada retirando o elemento manipulado (primeiro)
             const queue = db.get("queue").value().slice(1);
             // Atualiza no banco de dados local
@@ -41,24 +42,22 @@ exports.queueHandlerFactory = ({
      *
      * @param {*} event Evento do banco de dados
      */
-    const handleEvent = (event) => {
+    const handleEvent = async (event, db) => {
+        // Valida se existe algum manipulador para aquela tabela que teve um evento
+        if(typeof eventHandlers[`${event.table}`] !== 'function') {
+            console.log(
+                new Date(),
+                "queueHandler > handleEvent",
+                `Nenhum handler informado para a tabela '${event.table}'`
+            );
+            return;
+        }
         try {
-            // Valida se existe algum manipulador para aquela tabela que teve um evento
-            if (eventHandlers[`${event.table}`]) {
-                // Se existir, executa a ação especifica daquela tabela
-                eventHandlers[`${event.table}`](event).catch((error) =>
-                    console.log(new Date(), "Erro ao manipular evento", error)
-                );
-            } else {
-                // Se nao, informa no log que nao tem manipulador para a tabela que teve o evento.
-                console.log(
-                    new Date(),
-                    "queueHandler > handleEvent",
-                    `Nenhum handler informado para a tabela '${event.table}'`
-                );
-            }
-        } catch (error) {
-            console.log(new Date(), "Erro ao manipular evento", error);
+            // Se existir, executa a ação especifica daquela tabela
+            await eventHandlers[`${event.table}`](event);
+        } catch (handlerError) {
+            console.log(new Date(), "Erro ao manipular evento", handlerError);
+            saveFailedEvents({ event, fail_reason: handlerError.message }, db);
         }
     };
 

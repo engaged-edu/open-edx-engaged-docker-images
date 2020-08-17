@@ -2,11 +2,11 @@ const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
 const path = require("path");
 
-const startLowDb = () => {
+const startLowDb = ({ NODE_ENV, ENV_MODE }) => {
     let response = false;
     try {
         var pathToFile;
-        if (process.env.NODE_ENV === "production") {
+        if (NODE_ENV === ENV_MODE.PRODUCTION) {
             pathToFile = path.join(
                 path.parse(process.cwd()).root,
                 "var",
@@ -44,14 +44,15 @@ const saveDbState = (db, nextPosition, binlogName) => {
 /**
  * Metodo para salvar no banco local envios de eventos que falharam, para que possam ser reprocessados.
  *
- * @param {*} event Evento que falhou no envio.
- * @param {*} db Objeto do banco de dados
+ * @param {*} event Evento que falhou no envio
+ * @param {*} db Objeto do banco de dadoss
  */
-const saveFailedEvents = (event, db) => {
+const saveFailedEvents = ({ event, fail_reason } = {}, db) => {
     try {
-        db.get("failedEvents").push({ event }).write();
+        db.get("failedEvents").push({ event, fail_reason }).write();
     } catch (error) {
         console.log(new Date(), "lowdb > saveFailedEvents", error);
+        throw error;
     }
 };
 
