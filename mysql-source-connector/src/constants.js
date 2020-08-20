@@ -1,3 +1,5 @@
+const MySQLEvents = require('@rodrigogs/mysql-events');
+
 exports.BOOTSTRAP_MODE = {
   WORKER: 'worker',
 };
@@ -16,6 +18,10 @@ exports.OPEN_EDX_MYSQL_TABLE = Object.freeze({
   COURSEWARE_STUDENT_MODULE: 'courseware_studentmodule',
 });
 exports.OPEN_EDX_MYSQL_TABLES = Object.values(this.OPEN_EDX_MYSQL_TABLE);
+
+exports.OPEN_EDX_MYSQL_WATCH_STATEMENTS = Object.freeze({
+  ALL: MySQLEvents.STATEMENTS.ALL,
+});
 
 exports.EVENT_HANDLER_CONFIG = Object.freeze({
   [this.OPEN_EDX_MYSQL_TABLE.COURSEWARE_STUDENT_MODULE]: {
@@ -40,6 +46,17 @@ exports.ERROR_LEVEL = Object.freeze({
 exports.APP_ERROR_MESSAGE = Object.freeze({
   QUEUE: {
     GET_FROM_LOCAL_DB: 'Não foi possível obter a fila de eventos do banco de dados local',
-    SET_ON_LOCAL_DB: 'Não foi possível salvar a fila de eventos no banco de dados local ',
+    SET_ON_LOCAL_DB: 'Não foi possível salvar a fila de eventos no banco de dados local',
+    ADD_TO_DLQ: 'Não foi possível enviar o evento para a dead-letter-queue',
+    INIT_CONFIG: 'Não foi possível inicializar a configuração da fila',
+    GET_CONFIG: 'Não foi possível recuperar a configuração da fila',
+    UPDATE_CONFIG: 'Não foi possível atualizar a configuração da fila',
+  },
+  OPEN_EDX_MYSQL: {
+    FETCH_USERS_QUERY: 'Não foi possível obter a lista de alunos do MySQL',
+  },
+  EVENT: {
+    HANDLE: 'Não foi possível processar o evento da fila',
+    EMIT_TO_EVENTBRIDGE: 'Não foi possível enviar o evento para o AWS EventBridge',
   },
 });
