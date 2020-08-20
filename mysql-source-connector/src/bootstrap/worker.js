@@ -1,4 +1,4 @@
-const { BOOTSTRAP_MODE, ERROR_LEVEL, OPEN_EDX_MYSQL_WATCH_STATEMENTS } = require('../constants');
+const { BOOTSTRAP_MODE, ERROR_LEVEL } = require('../constants');
 const { loadEnvironmentVariables } = require('../infra/config');
 const { startLog } = require('../infra/logger');
 const { configAppError } = require('../infra/error');
@@ -30,7 +30,23 @@ const setImmediatePromise = () => {
 };
 
 async function container() {
-  let ContainerError, containerLogger;
+  let ContainerError, containerLogger, containerMySQL, containerMySQLEvents;
+  function close() {
+    if (containerMySQLEvents) {
+      // finaliza
+    }
+    if (containerMySQL) {
+      // finaliza
+    }
+  }
+
+  process.on('exit', close);
+  process.on('SIGINT', close);
+  process.on('uncaughtException', function (uncaughtError) {
+    // trata o erro com o método disponível
+    close();
+  });
+
   try {
     const { ENV } = loadEnvironmentVariables({ bootstrapMode: BOOTSTRAP_MODE.WORKER });
 
@@ -59,41 +75,39 @@ async function container() {
     const { aws } = configAWSSDK({ ENV });
     const { eventBridge } = configAWSEventBridge({ aws, ENV });
 
-    const { getQueue } = getQueueFactory({ lowDb, AppError: ContainerError });
-    const { setQueue } = setQueueFactory({ lowDb, AppError: ContainerError });
+    const { getQueue } = getQueueFactory({ lowDb, AppError });
+    const { setQueue } = setQueueFactory({ lowDb, AppError });
     const { addEventToQueue } = addEventToQueueFactory({ getQueue, setQueue });
     const { getQueueHeadEvent } = getQueueHeadEventFactory({ getQueue });
     const { removeQueueHeadEvent } = removeQueueHeadEventFactory({ getQueue, setQueue });
-    const { fetchUsersFromOpenEdx } = fetchUsersFromOpenEdxFactory({ mysql, AppError: ContainerError });
-    const { emitEventToEventBridge } = emitEventToEventBridgeFactory({ ENV, eventBridge, AppError: ContainerError });
+    const { fetchUsersFromOpenEdx } = fetchUsersFromOpenEdxFactory({ mysql, AppError });
+    const { emitEventToEventBridge } = emitEventToEventBridgeFactory({ ENV, eventBridge, AppError });
     const { handleQueueEvent } = handleQueueEventFactory({
       emitEventToEventBridge,
       fetchUsersFromOpenEdx,
-      AppError: ContainerError,
+      AppError,
     });
     const { dequeueEvent } = dequeueEventFactory({
       addEventToQueue,
       getQueueHeadEvent,
       removeQueueHeadEvent,
       handleQueueEvent,
-      AppError: ContainerError,
+      AppError,
     });
-    const { getQueueConfiguration } = getQueueConfigurationFactory({ lowDb, AppError: ContainerError });
-    const { initQueueConfiguration } = initQueueConfigurationFactory({ lowDb, AppError: ContainerError });
-    const { updateQueueConfiguration } = updateQueueConfigurationFactory({ lowDb, AppError: ContainerError });
+    const { getQueueConfiguration } = getQueueConfigurationFactory({ lowDb, AppError });
+    const { initQueueConfiguration } = initQueueConfigurationFactory({ lowDb, AppError });
+    const { updateQueueConfiguration } = updateQueueConfigurationFactory({ lowDb, AppError });
     const { handleMySQLEvent } = handleMySQLEventFactory({
       addEventToQueue,
       updateQueueConfiguration,
-      ENV,
-      expression: '*',
-      statement: OPEN_EDX_MYSQL_WATCH_STATEMENTS.ALL,
     });
     const { mysqlEventInstance } = await startMySQLEvents({
       ENV,
       mysql,
-      initQueueConfiguration,
-      getQueueConfiguration,
+      AppError,
       handleMySQLEvent,
+      getQueueConfiguration,
+      initQueueConfiguration,
     });
 
     for (;;) {
@@ -108,7 +122,7 @@ async function container() {
           level: ERROR_LEVEL.FATAL,
           error: containerBootstrapError,
           message: finalErrorMessage,
-        }).dump();
+        }).flush();
       } else if (containerLogger) {
         containerLogger.fatal({
           error_message: finalErrorMessage,
@@ -150,6 +164,7 @@ async function container() {
         );
       }
     }
+    close();
     process.exit(1);
   }
 }

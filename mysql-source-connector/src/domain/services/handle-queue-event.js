@@ -51,7 +51,7 @@ exports.handleQueueEventFactory = ({ fetchUsersFromOpenEdx, emitEventToEventBrid
         throw new AppError({
           message: APP_ERROR_MESSAGE.EVENT.HANDLE,
           error: handleQueueEventError,
-        }).flush();
+        });
       }
     },
   };

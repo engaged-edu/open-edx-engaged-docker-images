@@ -1,7 +1,15 @@
 const MySQLEvents = require('@rodrigogs/mysql-events');
 const { OPEN_EDX_MYSQL_TABLES } = require('../../constants');
 
-exports.startMySQLEvents = async ({ ENV, mysql, getQueueConfiguration, initQueueConfiguration, handleMySQLEvent }) => {
+// TODO - injetar o AppError no container
+exports.startMySQLEvents = async ({
+  ENV,
+  mysql,
+  getQueueConfiguration,
+  initQueueConfiguration,
+  handleMySQLEvent,
+  AppError,
+}) => {
   // Configuração default da lib de eventos do banco de dados.
   let zongJiConfig = {
     startAtEnd: false,
@@ -31,7 +39,22 @@ exports.startMySQLEvents = async ({ ENV, mysql, getQueueConfiguration, initQueue
     console.error(new Date(), 'MySQLEvents.EVENTS.ZONGJI_ERROR', err),
   );
 
-  instance.addTrigger(handleMySQLEvent());
+  instance.addTrigger({
+    name: ENV.OPEN_EDX_MYSQL_DATABASE,
+    expression: '*',
+    statement: MySQLEvents.STATEMENTS.ALL,
+    onEvent: (event) => {
+      try {
+        handleMySQLEvent({ event });
+      } catch (handleError) {
+        // TODO - finalizar erro
+        new AppError({
+          message: '',
+          error: handleError,
+        }).flush();
+      }
+    },
+  });
 
   await instance.start();
 

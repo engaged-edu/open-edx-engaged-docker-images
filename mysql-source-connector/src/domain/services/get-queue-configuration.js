@@ -6,10 +6,10 @@ exports.getQueueConfigurationFactory = ({ lowDb, AppError }) => {
       try {
         return lowDb.get('configuration').value();
       } catch (getQueueConfigurationError) {
-        new AppError({
+        throw new AppError({
+          error: getQueueConfigurationError,
           message: APP_ERROR_MESSAGE.QUEUE.GET_CONFIG,
-        }).flush();
-        return {};
+        });
       }
     },
   };

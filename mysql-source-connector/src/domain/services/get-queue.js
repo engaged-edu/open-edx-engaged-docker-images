@@ -14,7 +14,7 @@ exports.getQueueFactory = ({ lowDb, AppError } = {}) => {
         throw new AppError({
           message: APP_ERROR_MESSAGE.QUEUE.GET_FROM_LOCAL_DB,
           error: getQueueError,
-        }).flush();
+        });
       }
     },
   };

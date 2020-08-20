@@ -12,4 +12,15 @@ module.exports = {
   rules: {
     'no-console': 'off',
   },
+  overrides: [
+    {
+      files: ['**/*.spec.js'],
+      env: {
+        es6: true,
+        node: true,
+        mocha: true,
+      },
+      plugins: ['mocha'],
+    },
+  ],
 };

@@ -1,5 +1,3 @@
-const MySQLEvents = require('@rodrigogs/mysql-events');
-
 exports.BOOTSTRAP_MODE = {
   WORKER: 'worker',
 };
@@ -18,10 +16,6 @@ exports.OPEN_EDX_MYSQL_TABLE = Object.freeze({
   COURSEWARE_STUDENT_MODULE: 'courseware_studentmodule',
 });
 exports.OPEN_EDX_MYSQL_TABLES = Object.values(this.OPEN_EDX_MYSQL_TABLE);
-
-exports.OPEN_EDX_MYSQL_WATCH_STATEMENTS = Object.freeze({
-  ALL: MySQLEvents.STATEMENTS.ALL,
-});
 
 exports.EVENT_HANDLER_CONFIG = Object.freeze({
   [this.OPEN_EDX_MYSQL_TABLE.COURSEWARE_STUDENT_MODULE]: {

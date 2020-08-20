@@ -13,7 +13,7 @@ exports.setQueueFactory = ({ lowDb, AppError } = {}) => {
         throw new AppError({
           message: APP_ERROR_MESSAGE.QUEUE.SET_ON_LOCAL_DB,
           error: setQueueError,
-        }).flush();
+        });
       }
     },
   };

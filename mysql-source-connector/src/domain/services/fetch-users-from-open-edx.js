@@ -14,9 +14,11 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
            */
           const { usersId } = joi.attempt(
             params,
-            joi.object({
-              usersId: joi.array().items(joi.number().positive().integer().required()).required(),
-            }),
+            joi
+              .object({
+                usersId: joi.array().items(joi.number().positive().integer().required()).required(),
+              })
+              .required(),
           );
           if (usersId.length === 0) {
             return resolve({ users: [] });
@@ -27,7 +29,7 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
                 new AppError({
                   message: APP_ERROR_MESSAGE.OPEN_EDX_MYSQL.FETCH_USERS_QUERY,
                   error: usersQueryError,
-                }).flush(),
+                }),
               );
             }
             if (!Array.isArray(users)) {
@@ -35,7 +37,7 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
                 new AppError({
                   message: APP_ERROR_MESSAGE.OPEN_EDX_MYSQL.FETCH_USERS_QUERY,
                   error: new Error('invalid mysql query response'),
-                }).flush(),
+                }),
               );
             }
             return resolve(users.map((user) => ({ ...user })));
@@ -45,7 +47,7 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
             new AppError({
               message: APP_ERROR_MESSAGE.OPEN_EDX_MYSQL.FETCH_USERS_QUERY,
               error: mysqlError,
-            }).flush(),
+            }),
           );
         }
       });

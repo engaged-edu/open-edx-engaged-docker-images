@@ -1,3 +1,4 @@
+const joi = require('@hapi/joi');
 const { APP_ERROR_MESSAGE } = require('../../constants');
 
 /**
@@ -18,21 +19,33 @@ exports.emitEventToEventBridgeFactory = ({ ENV, eventBridge, AppError }) => {
           }),
         };
         const res = await eventBridge.putEvents({ Entries: [eventToSend] }).promise();
-        if (
-          !res ||
-          res.FailedEntryCount !== 0 ||
-          !Array.isArray(res.Entries) ||
-          res.Entries.length !== 1 ||
-          typeof res.Entries[0].EventId !== 'string'
-        ) {
-          throw new Error('failed to emit event to event bridge');
-        }
+        joi.assert(
+          res,
+          joi
+            .object({
+              FailedEntryCount: joi.number().valid(0).required(),
+              Entries: joi
+                .array()
+                .length(1)
+                .items(
+                  joi
+                    .object({
+                      EventId: joi.string().uuid().required(),
+                    })
+                    .unknown()
+                    .required(),
+                )
+                .required(),
+            })
+            .unknown()
+            .required(),
+        );
         return { eventId: res.Entries[0].EventId };
       } catch (emitToEventBridgeError) {
         throw new AppError({
           message: APP_ERROR_MESSAGE.EVENT.EMIT_TO_EVENTBRIDGE,
           error: emitToEventBridgeError,
-        }).flush();
+        });
       }
     },
   };
