@@ -26,7 +26,7 @@ exports.configAppError = ({ logger } = {}) => {
       return this.error_origin ? this.error_origin.message : undefined;
     }
     dump() {
-      logger({
+      logger.error({
         level: this.level,
         error_name: this.name,
         error_message: this.message,
@@ -39,6 +39,9 @@ exports.configAppError = ({ logger } = {}) => {
     flush() {
       this.dump();
       return this;
+    }
+    toObject() {
+      return { ...this };
     }
   }
   return { AppError };
