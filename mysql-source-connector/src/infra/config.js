@@ -70,7 +70,7 @@ const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
   }
 
   envVars.BOOTSTRAP_MODE = bootstrapMode;
-  envVars.LOWDB_FILE_PATH = getLowDBFilePath();
+  envVars.LOWDB_FILE_PATH = getLowDBFilePath(envVars.NODE_ENV);
 
   return { ENV: envVars };
 };
