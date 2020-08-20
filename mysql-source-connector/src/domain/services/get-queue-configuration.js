@@ -1,7 +1,16 @@
-exports.getQueueConfigurationFactory = ({ lowDb }) => {
+const { APP_ERROR_MESSAGE } = require('../../constants');
+
+exports.getQueueConfigurationFactory = ({ lowDb, AppError }) => {
   return {
     getQueueConfiguration: () => {
-      return lowDb.get('configuration').value();
+      try {
+        return lowDb.get('configuration').value();
+      } catch (getQueueConfigurationError) {
+        new AppError({
+          message: APP_ERROR_MESSAGE.QUEUE.GET_CONFIG,
+        }).flush();
+        return {};
+      }
     },
   };
 };
