@@ -1,4 +1,4 @@
-const { BOOTSTRAP_MODE, ERROR_LEVEL } = require('../constants');
+const { BOOTSTRAP_MODE, ERROR_LEVEL, OPEN_EDX_MYSQL_WATCH_STATEMENTS } = require('../constants');
 const { loadEnvironmentVariables } = require('../infra/config');
 const { startLog } = require('../infra/logger');
 const { configAppError } = require('../infra/error');
@@ -57,26 +57,37 @@ async function container() {
     });
 
     const { aws } = configAWSSDK({ ENV });
-    const { eventBridge } = configAWSEventBridge({ aws });
+    const { eventBridge } = configAWSEventBridge({ aws, ENV });
 
-    const { getQueue } = getQueueFactory({ lowDb, AppError });
-    const { setQueue } = setQueueFactory({ lowDb });
+    const { getQueue } = getQueueFactory({ lowDb, AppError: ContainerError });
+    const { setQueue } = setQueueFactory({ lowDb, AppError: ContainerError });
     const { addEventToQueue } = addEventToQueueFactory({ getQueue, setQueue });
     const { getQueueHeadEvent } = getQueueHeadEventFactory({ getQueue });
     const { removeQueueHeadEvent } = removeQueueHeadEventFactory({ getQueue, setQueue });
-    const { fetchUsersFromOpenEdx } = fetchUsersFromOpenEdxFactory({ mysql });
-    const { emitEventToEventBridge } = emitEventToEventBridgeFactory({ ENV, eventBridge });
-    const { handleQueueEvent } = handleQueueEventFactory({ emitEventToEventBridge, fetchUsersFromOpenEdx });
+    const { fetchUsersFromOpenEdx } = fetchUsersFromOpenEdxFactory({ mysql, AppError: ContainerError });
+    const { emitEventToEventBridge } = emitEventToEventBridgeFactory({ ENV, eventBridge, AppError: ContainerError });
+    const { handleQueueEvent } = handleQueueEventFactory({
+      emitEventToEventBridge,
+      fetchUsersFromOpenEdx,
+      AppError: ContainerError,
+    });
     const { dequeueEvent } = dequeueEventFactory({
       addEventToQueue,
       getQueueHeadEvent,
       removeQueueHeadEvent,
       handleQueueEvent,
+      AppError: ContainerError,
     });
-    const { getQueueConfiguration } = getQueueConfigurationFactory({ lowDb });
-    const { initQueueConfiguration } = initQueueConfigurationFactory({ lowDb });
-    const { updateQueueConfiguration } = updateQueueConfigurationFactory({ lowDb });
-    const { handleMySQLEvent } = handleMySQLEventFactory({ addEventToQueue, updateQueueConfiguration });
+    const { getQueueConfiguration } = getQueueConfigurationFactory({ lowDb, AppError: ContainerError });
+    const { initQueueConfiguration } = initQueueConfigurationFactory({ lowDb, AppError: ContainerError });
+    const { updateQueueConfiguration } = updateQueueConfigurationFactory({ lowDb, AppError: ContainerError });
+    const { handleMySQLEvent } = handleMySQLEventFactory({
+      addEventToQueue,
+      updateQueueConfiguration,
+      ENV,
+      expression: '*',
+      statement: OPEN_EDX_MYSQL_WATCH_STATEMENTS.ALL,
+    });
     const { mysqlEventInstance } = await startMySQLEvents({
       ENV,
       mysql,
@@ -90,8 +101,8 @@ async function container() {
       await dequeueEvent();
     }
   } catch (containerBootstrapError) {
+    let finalErrorMessage = 'Falha crítica no container da aplicação';
     if (containerBootstrapError instanceof Error) {
-      const finalErrorMessage = 'Falha crítica no container da aplicação';
       if (ContainerError) {
         new ContainerError({
           level: ERROR_LEVEL.FATAL,
@@ -115,21 +126,26 @@ async function container() {
         );
       }
     } else {
-      const finalErrorMessage = 'Falha crítica desconhecida no container da aplicação';
+      finalErrorMessage += ' (Desconhecida)';
       if (ContainerError) {
         new ContainerError({
           level: ERROR_LEVEL.FATAL,
+          error: new Error('Unknown'),
           message: finalErrorMessage,
         }).flush();
       } else if (containerLogger) {
         containerLogger.fatal({
           error_message: finalErrorMessage,
+          error_origin_name: 'Unknown',
+          error_origin_message: 'Unknown',
         });
       } else {
         console.log(
           JSON.stringify({
             level: ERROR_LEVEL.FATAL,
             error_message: finalErrorMessage,
+            error_origin_name: 'Unknown',
+            error_origin_message: 'Unknown',
           }),
         );
       }
