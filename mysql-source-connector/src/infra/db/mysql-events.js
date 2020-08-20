@@ -31,7 +31,7 @@ exports.startMySQLEvents = async ({ ENV, mysql, getQueueConfiguration, initQueue
     console.error(new Date(), 'MySQLEvents.EVENTS.ZONGJI_ERROR', err),
   );
 
-  instance.addTrigger(handleMySQLEvent);
+  instance.addTrigger(handleMySQLEvent());
 
   await instance.start();
 
