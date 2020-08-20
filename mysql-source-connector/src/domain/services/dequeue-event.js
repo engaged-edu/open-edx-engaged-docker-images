@@ -1,4 +1,4 @@
-const { EVENT_HANDLER_CONFIG } = require('../../constants');
+const { EVENT_HANDLER_CONFIG, APP_ERROR_MESSAGE } = require('../../constants');
 
 exports.dequeueEventFactory = ({
   AppError,
@@ -22,7 +22,10 @@ exports.dequeueEventFactory = ({
         try {
           addEventToQueue({ event, dlq: true });
         } catch (dlqEventError) {
-          // thorw
+          throw new AppError({
+            message: APP_ERROR_MESSAGE.QUEUE.ADD_TO_DLQ,
+            error: dlqEventError,
+          });
         }
       }
       removeQueueHeadEvent();
