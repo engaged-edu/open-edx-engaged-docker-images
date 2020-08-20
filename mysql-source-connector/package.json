@@ -2,10 +2,10 @@
   "name": "mysql-source-connector",
   "version": "1.0.0",
   "description": "Node project to watch for mysql database changes",
-  "main": "src/index.js",
+  "main": "src/bootstrap/worker.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
+    "dev": "nodemon src/bootstrap/worker.js",
+    "start": "node src/bootstrap/worker.js",
     "clean": "rm -rf node_modules"
   },
   "author": "Gustavo Santos",
