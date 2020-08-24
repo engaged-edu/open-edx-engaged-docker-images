@@ -17,7 +17,10 @@ exports.dequeueEventFactory = ({
       try {
         await handleQueueEvent({ event, eventAffectedRowUserField });
       } catch (eventHandlerError) {
-        const eventError = new AppError({ message: '', error: eventHandlerError }).flush();
+        const eventError = new AppError({
+          message: APP_ERROR_MESSAGE.QUEUE.HANDLING_EVENT,
+          error: eventHandlerError,
+        }).flush();
         event.fail_reason = eventError.toObject();
         try {
           addEventToQueue({ event, dlq: true });
