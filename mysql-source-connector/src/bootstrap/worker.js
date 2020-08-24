@@ -68,13 +68,11 @@ async function container() {
       await terminateAPM({ apm: containerAPM, handleTerminationError });
     } catch (onCloseConnError) {
       if (onCloseConnError instanceof Error) {
-        //TODO - Error code
         handleTerminationError({
           error: onCloseConnError,
           code: APP_ERROR_CODE.WORKER_END_APPLICATION,
         });
       } else {
-        //TODO - Error code
         handleTerminationError({
           error: new Error('unknown error during container termination'),
           code: APP_ERROR_CODE.WORKER_END_APPLICATION_UNKNOWN,
@@ -85,7 +83,6 @@ async function container() {
   };
 
   process.on('exit', () => {
-    //TODO - Message
     console.log(JSON.stringify({ message: 'Application exiting' }));
   });
   ['SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM'].forEach((signal) => {
@@ -94,7 +91,6 @@ async function container() {
     });
   });
   process.on('uncaughtException', async function (uncaughtError) {
-    //TODO - Error code
     handleTerminationError({ error: uncaughtError, code: APP_ERROR_CODE.WORKER_UNCAUGHT_EXCEPTION });
     terminateContainer({ code: 1 });
   });
@@ -112,7 +108,6 @@ async function container() {
     ContainerError = AppError;
 
     const { lowDb } = await startLowDb({ ENV }).catch((lowDbStartupError) => {
-      //TODO - Error code
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: lowDbStartupError,
@@ -121,7 +116,6 @@ async function container() {
     });
 
     const { mysql } = await connectToMySQL({ ENV }).catch((mysqlConnectionError) => {
-      //TODO - Error code
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: mysqlConnectionError,
@@ -179,13 +173,11 @@ async function container() {
     }
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {
-      //TODO - Error code
       handleTerminationError({
         code: APP_ERROR_CODE.WORKER_APPLICATION,
         error: containerBootstrapError,
       });
     } else {
-      //TODO - Error code
       handleTerminationError({
         code: APP_ERROR_CODE.WORKER_APPLICATION_UNKNOWN,
         error: new Error('unexpected container error'),
