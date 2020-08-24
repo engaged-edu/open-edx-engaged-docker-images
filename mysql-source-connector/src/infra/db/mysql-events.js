@@ -1,7 +1,6 @@
 const MySQLEvents = require('@rodrigogs/mysql-events');
-const { OPEN_EDX_MYSQL_TABLES } = require('../../constants');
+const { OPEN_EDX_MYSQL_TABLES, APP_ERROR_MESSAGE } = require('../../constants');
 
-// TODO - injetar o AppError no container
 exports.startMySQLEvents = async ({
   ENV,
   mysql,
@@ -47,9 +46,8 @@ exports.startMySQLEvents = async ({
       try {
         handleMySQLEvent({ event });
       } catch (handleError) {
-        // TODO - finalizar erro
         new AppError({
-          message: '',
+          message: APP_ERROR_MESSAGE.TRIGGER.ADD,
           error: handleError,
         }).flush();
       }
