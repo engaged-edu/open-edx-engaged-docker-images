@@ -1,7 +1,8 @@
 const MySQLEvents = require('@rodrigogs/mysql-events');
-const { OPEN_EDX_MYSQL_TABLES, APP_ERROR_MESSAGE } = require('../../constants');
+const { OPEN_EDX_MYSQL_TABLES, APP_ERROR_MESSAGE, APP_ERROR_CODE } = require('../../constants');
 
 exports.startMySQLEvents = async ({
+  apm,
   ENV,
   mysql,
   getQueueConfiguration,
@@ -43,13 +44,19 @@ exports.startMySQLEvents = async ({
     expression: '*',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => {
+      apm.startTransaction('mysql-binlog-event-trigger', 'db', 'mysql');
       try {
         handleMySQLEvent({ event });
+        apm.endTransaction(200);
       } catch (handleError) {
         new AppError({
           message: APP_ERROR_MESSAGE.TRIGGER.ADD,
           error: handleError,
+          context: {
+            mysql_trigger_event: event,
+          },
         }).flush();
+        apm.endTransaction(500);
       }
     },
   });
@@ -57,4 +64,15 @@ exports.startMySQLEvents = async ({
   await instance.start();
 
   return { mysqlEventInstance: instance };
+};
+
+exports.terminateMySQLEvents = async ({ mysqlEventInstance, handleTerminationError } = {}) => {
+  if (!(mysqlEventInstance instanceof MySQLEvents)) {
+    return;
+  }
+  await mysqlEventInstance.stop().catch((stopError) => {
+    handleTerminationError({ error: stopError, code: APP_ERROR_CODE.MYSQL_EVENTS_TERMINATION });
+    return;
+  });
+  return;
 };

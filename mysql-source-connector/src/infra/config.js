@@ -2,6 +2,7 @@ const path = require('path');
 const env = require('dotenv');
 const joi = require('@hapi/joi');
 const { ENV_MODE, ENV_MODES, BOOTSTRAP_MODES, OPEN_EDX_MYSQL_DEFAULT_SCHEMA } = require('../constants');
+const { version } = require('../../package.json');
 
 const PROCESS_ROOT_DIR = process.cwd();
 const SERVER_ROOT_DIR = path.parse(PROCESS_ROOT_DIR).root;
@@ -62,6 +63,8 @@ const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
       ENGAGED_AWS_EVENTBRIDGE_BUS_NAME: joi.string().default('open-edx-event-bus'),
       ENGAGED_AWS_EVENTBRIDGE_BUS_REGION: joi.string().default('sa-east-1'),
       ENGAGED_SERVER_IDENTIFIER: joi.string().required(),
+      APM_SERVER_URL: joi.string().required(),
+      APM_SECRET_TOKEN: joi.string().required(),
     })
     .required()
     .validate(rawEnvVars);
@@ -69,6 +72,7 @@ const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
     throw envVarsValidationError;
   }
 
+  envVars.APP_VERSION = version;
   envVars.BOOTSTRAP_MODE = bootstrapMode;
   envVars.LOWDB_FILE_PATH = getLowDBFilePath(envVars.NODE_ENV);
 

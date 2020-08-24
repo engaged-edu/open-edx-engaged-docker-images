@@ -20,3 +20,18 @@ exports.connectToMySQL = ({ ENV } = {}) => {
     }
   });
 };
+
+exports.terminateMySQL = async ({ mysql: connection, handleTerminationError } = {}) => {
+  if (!connection || typeof connection.constructor !== 'function' || connection.constructor.name !== 'Connection') {
+    return;
+  }
+  await new Promise((resolve) => {
+    connection.end((connectionError) => {
+      if (connectionError) {
+        handleTerminationError({ error: connectionError, code: '' });
+      }
+      return resolve();
+    });
+  });
+  return;
+};

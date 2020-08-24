@@ -1,10 +1,11 @@
-const { BOOTSTRAP_MODE, ERROR_LEVEL } = require('../constants');
+const { startAPM, terminateAPM } = require('../infra/apm');
+const { BOOTSTRAP_MODE, ERROR_LEVEL, APP_ERROR_MESSAGE } = require('../constants');
 const { loadEnvironmentVariables } = require('../infra/config');
 const { startLog } = require('../infra/logger');
 const { configAppError } = require('../infra/error');
 const { startLowDb } = require('../infra/db/lowdb');
-const { connectToMySQL } = require('../infra/db/mysql');
-const { startMySQLEvents } = require('../infra/db/mysql-events');
+const { connectToMySQL, terminateMySQL } = require('../infra/db/mysql');
+const { startMySQLEvents, terminateMySQLEvents } = require('../infra/db/mysql-events');
 
 const { configAWSSDK } = require('../infra/sdk/aws');
 const { configAWSEventBridge } = require('../infra/sdk/event-bridge');
@@ -30,17 +31,19 @@ const setImmediatePromise = () => {
 };
 
 async function container() {
-  let ContainerError, containerLogger, containerMySQL, containerMySQLEvents;
+  let ContainerError, containerLogger, containerMySQL, containerMySQLEvents, containerAPM;
 
-  const handleError = ({ error, message } = {}) => {
+  const handleTerminationError = ({ error, code } = {}) => {
+    const message = APP_ERROR_MESSAGE[code];
     if (ContainerError) {
       new ContainerError({
-        level: ERROR_LEVEL.FATAL,
+        code,
         error,
-        message,
+        level: ERROR_LEVEL.FATAL,
       }).flush();
     } else if (containerLogger) {
       containerLogger.fatal({
+        error_code: code,
         error_message: message,
         error_origin_name: error.name,
         error_origin_message: error.message,
@@ -49,6 +52,7 @@ async function container() {
       console.log(
         JSON.stringify({
           level: ERROR_LEVEL.FATAL,
+          error_code: code,
           error_message: message,
           error_origin_name: error.name,
           error_origin_message: error.message,
@@ -56,30 +60,19 @@ async function container() {
       );
     }
   };
+
   const terminateContainer = async ({ code = 2 } = {}) => {
     try {
-      if (containerMySQLEvents) {
-        // finaliza o listener de eventos
-        await containerMySQLEvents.stop();
-      }
-      if (containerMySQL) {
-        // finaliza a conexao com mysql
-        await new Promise((resolve, reject) => {
-          containerMySQL.end((connectionError) => {
-            if (connectionError) {
-              return reject(connectionError);
-            }
-            return resolve();
-          });
-        });
-      }
+      await terminateMySQLEvents({ mysqlEventInstance: containerMySQLEvents, handleTerminationError });
+      await terminateMySQL({ mysql: containerMySQL, handleTerminationError });
+      await terminateAPM({ apm: containerAPM, handleTerminationError });
     } catch (onCloseConnError) {
       if (onCloseConnError instanceof Error) {
-        //TODO - Error message
-        handleError({ error: onCloseConnError, message: 'Erro ao encerrar a aplicação' });
+        //TODO - Error code
+        handleTerminationError({ error: onCloseConnError, message: 'Erro ao encerrar a aplicação' });
       } else {
-        //TODO - Error message
-        handleError({
+        //TODO - Error code
+        handleTerminationError({
           error: new Error('unknown error during container termination'),
           message: 'Erro desconhecido ao encerrar a aplicação ',
         });
@@ -98,13 +91,16 @@ async function container() {
     });
   });
   process.on('uncaughtException', async function (uncaughtError) {
-    //TODO - Error message
-    handleError({ error: uncaughtError, message: 'Erro não tratado' });
+    //TODO - Error code
+    handleTerminationError({ error: uncaughtError, message: 'Erro não tratado' });
     terminateContainer({ code: 1 });
   });
 
   try {
     const { ENV } = loadEnvironmentVariables({ bootstrapMode: BOOTSTRAP_MODE.WORKER });
+
+    const { apm } = startAPM({ ENV });
+    containerAPM = apm;
 
     const { logger } = startLog({ ENV });
     containerLogger = logger;
@@ -113,7 +109,7 @@ async function container() {
     ContainerError = AppError;
 
     const { lowDb } = await startLowDb({ ENV }).catch((lowDbStartupError) => {
-      //TODO - Error message
+      //TODO - Error code
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: lowDbStartupError,
@@ -122,7 +118,7 @@ async function container() {
     });
 
     const { mysql } = await connectToMySQL({ ENV }).catch((mysqlConnectionError) => {
-      //TODO - Error message
+      //TODO - Error code
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: mysqlConnectionError,
@@ -162,6 +158,7 @@ async function container() {
       AppError,
     });
     const { mysqlEventInstance } = await startMySQLEvents({
+      apm,
       ENV,
       mysql,
       AppError,
@@ -173,18 +170,20 @@ async function container() {
 
     for (;;) {
       await setImmediatePromise();
+      apm.startTransaction('dequeue-event', 'db', 'lowdb');
       await dequeueEvent();
+      apm.endTransaction(200);
     }
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {
-      //TODO - Error message
-      handleError({
+      //TODO - Error code
+      handleTerminationError({
         message: 'Falha crítica no container da aplicação',
         error: containerBootstrapError,
       });
     } else {
-      //TODO - Error message
-      handleError({
+      //TODO - Error code
+      handleTerminationError({
         message: 'Falha crítica desconhecida no container da aplicação',
         error: new Error('unexpected container error'),
       });

@@ -20,6 +20,9 @@ exports.dequeueEventFactory = ({
         const eventError = new AppError({
           message: APP_ERROR_MESSAGE.QUEUE.HANDLING_EVENT,
           error: eventHandlerError,
+          context: {
+            mysql_trigger_event: event,
+          },
         }).flush();
         event.fail_reason = eventError.toObject();
         try {
@@ -28,6 +31,9 @@ exports.dequeueEventFactory = ({
           throw new AppError({
             message: APP_ERROR_MESSAGE.QUEUE.ADD_TO_DLQ,
             error: dlqEventError,
+            context: {
+              mysql_trigger_event: event,
+            },
           });
         }
       }
