@@ -31,18 +31,39 @@ const setImmediatePromise = () => {
 
 async function container() {
   let ContainerError, containerLogger, containerMySQL, containerMySQLEvents;
-  function close() {
-    if (containerMySQLEvents) {
-      // finaliza
-    }
-    if (containerMySQL) {
-      // finaliza
+  async function close() {
+    try {
+      if (containerMySQLEvents) {
+        // finaliza o listener de eventos
+        await containerMySQLEvents.stop();
+      }
+      if (containerMySQL) {
+        // finaliza a conexao com mysql
+        containerMySQL.end();
+      }
+    } catch (onCloseConnError) {
+      console.log(
+        JSON.stringify({
+          level: ERROR_LEVEL.FATAL,
+          error_message: onCloseConnError.message || 'onCloseConnError',
+          error_origin_name: 'Unknown',
+          error_origin_message: 'Unknown',
+        }),
+      );
     }
   }
 
   process.on('exit', close);
   process.on('SIGINT', close);
   process.on('uncaughtException', function (uncaughtError) {
+    console.log(
+      JSON.stringify({
+        level: ERROR_LEVEL.FATAL,
+        error_message: uncaughtError.message,
+        error_origin_name: uncaughtError.name,
+        error_origin_message: 'uncaughtError',
+      }),
+    );
     // trata o erro com o método disponível
     close();
   });
@@ -100,6 +121,7 @@ async function container() {
     const { handleMySQLEvent } = handleMySQLEventFactory({
       addEventToQueue,
       updateQueueConfiguration,
+      AppError,
     });
     const { mysqlEventInstance } = await startMySQLEvents({
       ENV,
