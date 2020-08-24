@@ -31,7 +31,32 @@ const setImmediatePromise = () => {
 
 async function container() {
   let ContainerError, containerLogger, containerMySQL, containerMySQLEvents;
-  async function close() {
+
+  const handleError = ({ error, message } = {}) => {
+    if (ContainerError) {
+      new ContainerError({
+        level: ERROR_LEVEL.FATAL,
+        error,
+        message,
+      }).flush();
+    } else if (containerLogger) {
+      containerLogger.fatal({
+        error_message: message,
+        error_origin_name: error.name,
+        error_origin_message: error.message,
+      });
+    } else {
+      console.log(
+        JSON.stringify({
+          level: ERROR_LEVEL.FATAL,
+          error_message: message,
+          error_origin_name: error.name,
+          error_origin_message: error.message,
+        }),
+      );
+    }
+  };
+  const terminateContainer = async ({ code = 2 } = {}) => {
     try {
       if (containerMySQLEvents) {
         // finaliza o listener de eventos
@@ -39,33 +64,43 @@ async function container() {
       }
       if (containerMySQL) {
         // finaliza a conexao com mysql
-        containerMySQL.end();
+        await new Promise((resolve, reject) => {
+          containerMySQL.end((connectionError) => {
+            if (connectionError) {
+              return reject(connectionError);
+            }
+            return resolve();
+          });
+        });
       }
     } catch (onCloseConnError) {
-      console.log(
-        JSON.stringify({
-          level: ERROR_LEVEL.FATAL,
-          error_message: onCloseConnError.message || 'onCloseConnError',
-          error_origin_name: 'Unknown',
-          error_origin_message: 'Unknown',
-        }),
-      );
+      if (onCloseConnError instanceof Error) {
+        //TODO - Error message
+        handleError({ error: onCloseConnError, message: 'Erro ao encerrar a aplicação' });
+      } else {
+        //TODO - Error message
+        handleError({
+          error: new Error('unknown error during container termination'),
+          message: 'Erro desconhecido ao encerrar a aplicação ',
+        });
+      }
     }
-  }
+    process.exit(code);
+  };
 
-  process.on('exit', close);
-  process.on('SIGINT', close);
-  process.on('uncaughtException', function (uncaughtError) {
-    console.log(
-      JSON.stringify({
-        level: ERROR_LEVEL.FATAL,
-        error_message: uncaughtError.message,
-        error_origin_name: uncaughtError.name,
-        error_origin_message: 'uncaughtError',
-      }),
-    );
-    // trata o erro com o método disponível
-    close();
+  process.on('exit', () => {
+    //TODO - Message
+    console.log(JSON.stringify({ message: 'Application exiting' }));
+  });
+  ['SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, () => {
+      terminateContainer({ code: 0 });
+    });
+  });
+  process.on('uncaughtException', async function (uncaughtError) {
+    //TODO - Error message
+    handleError({ error: uncaughtError, message: 'Erro não tratado' });
+    terminateContainer({ code: 1 });
   });
 
   try {
@@ -78,6 +113,7 @@ async function container() {
     ContainerError = AppError;
 
     const { lowDb } = await startLowDb({ ENV }).catch((lowDbStartupError) => {
+      //TODO - Error message
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: lowDbStartupError,
@@ -86,12 +122,14 @@ async function container() {
     });
 
     const { mysql } = await connectToMySQL({ ENV }).catch((mysqlConnectionError) => {
+      //TODO - Error message
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: mysqlConnectionError,
         message: 'Não foi possível inicar a conexão com o banco de dados MySQL do Open edX',
       });
     });
+    containerMySQL = mysql;
 
     const { aws } = configAWSSDK({ ENV });
     const { eventBridge } = configAWSEventBridge({ aws, ENV });
@@ -131,63 +169,27 @@ async function container() {
       getQueueConfiguration,
       initQueueConfiguration,
     });
+    containerMySQLEvents = mysqlEventInstance;
 
     for (;;) {
       await setImmediatePromise();
       await dequeueEvent();
     }
   } catch (containerBootstrapError) {
-    let finalErrorMessage = 'Falha crítica no container da aplicação';
     if (containerBootstrapError instanceof Error) {
-      if (ContainerError) {
-        new ContainerError({
-          level: ERROR_LEVEL.FATAL,
-          error: containerBootstrapError,
-          message: finalErrorMessage,
-        }).flush();
-      } else if (containerLogger) {
-        containerLogger.fatal({
-          error_message: finalErrorMessage,
-          error_origin_name: containerBootstrapError.name,
-          error_origin_message: containerBootstrapError.message,
-        });
-      } else {
-        console.log(
-          JSON.stringify({
-            level: ERROR_LEVEL.FATAL,
-            error_message: finalErrorMessage,
-            error_origin_name: containerBootstrapError.name,
-            error_origin_message: containerBootstrapError.message,
-          }),
-        );
-      }
+      //TODO - Error message
+      handleError({
+        message: 'Falha crítica no container da aplicação',
+        error: containerBootstrapError,
+      });
     } else {
-      finalErrorMessage += ' (Desconhecida)';
-      if (ContainerError) {
-        new ContainerError({
-          level: ERROR_LEVEL.FATAL,
-          error: new Error('Unknown'),
-          message: finalErrorMessage,
-        }).flush();
-      } else if (containerLogger) {
-        containerLogger.fatal({
-          error_message: finalErrorMessage,
-          error_origin_name: 'Unknown',
-          error_origin_message: 'Unknown',
-        });
-      } else {
-        console.log(
-          JSON.stringify({
-            level: ERROR_LEVEL.FATAL,
-            error_message: finalErrorMessage,
-            error_origin_name: 'Unknown',
-            error_origin_message: 'Unknown',
-          }),
-        );
-      }
+      //TODO - Error message
+      handleError({
+        message: 'Falha crítica desconhecida no container da aplicação',
+        error: new Error('unexpected container error'),
+      });
     }
-    close();
-    process.exit(1);
+    terminateContainer({ code: 1 });
   }
 }
 
