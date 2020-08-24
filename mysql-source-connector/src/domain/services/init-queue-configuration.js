@@ -1,4 +1,4 @@
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.initQueueConfigurationFactory = ({ lowDb, AppError } = {}) => {
   return {
@@ -12,7 +12,10 @@ exports.initQueueConfigurationFactory = ({ lowDb, AppError } = {}) => {
           })
           .write();
       } catch (initQueueError) {
-        throw new AppError({ message: APP_ERROR_MESSAGE.QUEUE.INIT_CONFIG, error: initQueueError });
+        throw new AppError({
+          error: initQueueError,
+          code: APP_ERROR_CODE.QUEUE_INIT_CONFIG,
+        });
       }
     },
   };

@@ -1,5 +1,5 @@
 const MySQLEvents = require('@rodrigogs/mysql-events');
-const { OPEN_EDX_MYSQL_TABLES, APP_ERROR_MESSAGE, APP_ERROR_CODE } = require('../../constants');
+const { OPEN_EDX_MYSQL_TABLES, APP_ERROR_CODE } = require('../../constants');
 
 exports.startMySQLEvents = async ({
   apm,
@@ -50,7 +50,7 @@ exports.startMySQLEvents = async ({
         apm.endTransaction(200);
       } catch (handleError) {
         new AppError({
-          message: APP_ERROR_MESSAGE.TRIGGER.ADD,
+          code: APP_ERROR_CODE.TRIGGER_ADD,
           error: handleError,
           context: {
             mysql_trigger_event: event,

@@ -1,4 +1,4 @@
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.getQueueConfigurationFactory = ({ lowDb, AppError }) => {
   return {
@@ -8,7 +8,7 @@ exports.getQueueConfigurationFactory = ({ lowDb, AppError }) => {
       } catch (getQueueConfigurationError) {
         throw new AppError({
           error: getQueueConfigurationError,
-          message: APP_ERROR_MESSAGE.QUEUE.GET_CONFIG,
+          code: APP_ERROR_CODE.QUEUE_GET_CONFIG,
         });
       }
     },

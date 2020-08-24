@@ -1,5 +1,5 @@
 const joi = require('@hapi/joi');
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.handleMySQLEventFactory = ({ addEventToQueue, updateQueueConfiguration, AppError } = {}) => {
   return {
@@ -21,7 +21,7 @@ exports.handleMySQLEventFactory = ({ addEventToQueue, updateQueueConfiguration, 
         return;
       } catch (handleMySQLEventError) {
         throw new AppError({
-          message: APP_ERROR_MESSAGE.EVENT.HANDLE_MYSQL,
+          code: APP_ERROR_CODE.EVENT_HANDLE_MYSQL,
           error: handleMySQLEventError,
         });
       }

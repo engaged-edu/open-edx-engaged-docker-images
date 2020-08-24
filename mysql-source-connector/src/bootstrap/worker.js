@@ -1,5 +1,5 @@
 const { startAPM, terminateAPM } = require('../infra/apm');
-const { BOOTSTRAP_MODE, ERROR_LEVEL, APP_ERROR_MESSAGE } = require('../constants');
+const { BOOTSTRAP_MODE, ERROR_LEVEL, APP_ERROR_MESSAGE, APP_ERROR_CODE } = require('../constants');
 const { loadEnvironmentVariables } = require('../infra/config');
 const { startLog } = require('../infra/logger');
 const { configAppError } = require('../infra/error');
@@ -69,12 +69,15 @@ async function container() {
     } catch (onCloseConnError) {
       if (onCloseConnError instanceof Error) {
         //TODO - Error code
-        handleTerminationError({ error: onCloseConnError, message: 'Erro ao encerrar a aplicação' });
+        handleTerminationError({
+          error: onCloseConnError,
+          code: APP_ERROR_CODE.WORKER_END_APPLICATION,
+        });
       } else {
         //TODO - Error code
         handleTerminationError({
           error: new Error('unknown error during container termination'),
-          message: 'Erro desconhecido ao encerrar a aplicação ',
+          code: APP_ERROR_CODE.WORKER_END_APPLICATION_UNKNOWN,
         });
       }
     }
@@ -92,7 +95,7 @@ async function container() {
   });
   process.on('uncaughtException', async function (uncaughtError) {
     //TODO - Error code
-    handleTerminationError({ error: uncaughtError, message: 'Erro não tratado' });
+    handleTerminationError({ error: uncaughtError, code: APP_ERROR_CODE.WORKER_UNCAUGHT_EXCEPTION });
     terminateContainer({ code: 1 });
   });
 
@@ -113,7 +116,7 @@ async function container() {
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: lowDbStartupError,
-        message: 'Não foi possível inicar o banco de dados local da aplicação',
+        code: APP_ERROR_CODE.WORKER_LOCAL_DB_START,
       });
     });
 
@@ -122,7 +125,7 @@ async function container() {
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: mysqlConnectionError,
-        message: 'Não foi possível inicar a conexão com o banco de dados MySQL do Open edX',
+        code: APP_ERROR_CODE.WORKER_MYSQL_CONN_START,
       });
     });
     containerMySQL = mysql;
@@ -178,13 +181,13 @@ async function container() {
     if (containerBootstrapError instanceof Error) {
       //TODO - Error code
       handleTerminationError({
-        message: 'Falha crítica no container da aplicação',
+        code: APP_ERROR_CODE.WORKER_APPLICATION,
         error: containerBootstrapError,
       });
     } else {
       //TODO - Error code
       handleTerminationError({
-        message: 'Falha crítica desconhecida no container da aplicação',
+        code: APP_ERROR_CODE.WORKER_APPLICATION_UNKNOWN,
         error: new Error('unexpected container error'),
       });
     }

@@ -1,4 +1,4 @@
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.handleQueueEventFactory = ({ fetchUsersFromOpenEdx, emitEventToEventBridge, AppError }) => {
   return {
@@ -49,7 +49,7 @@ exports.handleQueueEventFactory = ({ fetchUsersFromOpenEdx, emitEventToEventBrid
         return { eventId };
       } catch (handleQueueEventError) {
         throw new AppError({
-          message: APP_ERROR_MESSAGE.EVENT.HANDLE,
+          code: APP_ERROR_CODE.EVENT_HANDLE,
           error: handleQueueEventError,
         });
       }

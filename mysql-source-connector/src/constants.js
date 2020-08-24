@@ -39,6 +39,13 @@ exports.ERROR_LEVEL = Object.freeze({
 
 exports.APP_ERROR_CODE = new Proxy(
   Object.freeze({
+    WORKER_LOCAL_DB_START: true,
+    WORKER_MYSQL_CONN_START: true,
+    WORKER_APPLICATION: true,
+    WORKER_APPLICATION_UNKNOWN: true,
+    WORKER_END_APPLICATION: true,
+    WORKER_END_APPLICATION_UNKNOWN: true,
+    WORKER_UNCAUGHT_EXCEPTION: true,
     QUEUE_GET_FROM_LOCAL_DB: true,
     QUEUE_SET_ON_LOCAL_DB: true,
     QUEUE_ADD_TO_DLQ: true,
@@ -63,6 +70,14 @@ exports.APP_ERROR_CODE = new Proxy(
 
 exports.APP_ERROR_MESSAGE = new Proxy(
   Object.freeze({
+    [this.APP_ERROR_CODE.WORKER_LOCAL_DB_START]: 'Não foi possível inicar o banco de dados local da aplicação',
+    [this.APP_ERROR_CODE.WORKER_MYSQL_CONN_START]:
+      'Não foi possível inicar a conexão com o banco de dados MySQL do Open edX',
+    [this.APP_ERROR_CODE.WORKER_APPLICATION]: 'Falha crítica no container da aplicação',
+    [this.APP_ERROR_CODE.WORKER_APPLICATION_UNKNOWN]: 'Falha crítica desconhecida no container da aplicação',
+    [this.APP_ERROR_CODE.WORKER_END_APPLICATION]: 'Erro ao encerrar a aplicação',
+    [this.APP_ERROR_CODE.WORKER_END_APPLICATION_UNKNOWN]: 'Erro desconhecido ao encerrar a aplicação',
+    [this.APP_ERROR_CODE.WORKER_UNCAUGHT_EXCEPTION]: 'Erro não tratado',
     [this.APP_ERROR_CODE.QUEUE_GET_FROM_LOCAL_DB]: 'Não foi possível obter a fila de eventos do banco de dados local',
     [this.APP_ERROR_CODE.QUEUE_SET_ON_LOCAL_DB]: 'Não foi possível salvar a fila de eventos no banco de dados local',
     [this.APP_ERROR_CODE.QUEUE_ADD_TO_DLQ]: 'Não foi possível enviar o evento para a dead-letter-queue',

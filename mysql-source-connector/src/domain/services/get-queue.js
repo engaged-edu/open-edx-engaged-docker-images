@@ -1,4 +1,4 @@
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 const { getQueueName } = require('../helpers/get-queue-name');
 
 exports.getQueueFactory = ({ lowDb, AppError } = {}) => {
@@ -12,7 +12,7 @@ exports.getQueueFactory = ({ lowDb, AppError } = {}) => {
         return queue;
       } catch (getQueueError) {
         throw new AppError({
-          message: APP_ERROR_MESSAGE.QUEUE.GET_FROM_LOCAL_DB,
+          code: APP_ERROR_CODE.QUEUE_GET_FROM_LOCAL_DB,
           error: getQueueError,
         });
       }

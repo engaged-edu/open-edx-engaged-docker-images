@@ -1,5 +1,5 @@
 const joi = require('@hapi/joi');
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 /**
  * @param {{ ENV: import('../../infra/config').ENV, eventBridge: import('aws-sdk').EventBridge }}
@@ -43,7 +43,7 @@ exports.emitEventToEventBridgeFactory = ({ ENV, eventBridge, AppError }) => {
         return { eventId: res.Entries[0].EventId };
       } catch (emitToEventBridgeError) {
         throw new AppError({
-          message: APP_ERROR_MESSAGE.EVENT.EMIT_TO_EVENTBRIDGE,
+          code: APP_ERROR_CODE.EVENT_EMIT_TO_EVENTBRIDGE,
           error: emitToEventBridgeError,
         });
       }

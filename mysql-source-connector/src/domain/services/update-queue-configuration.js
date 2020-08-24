@@ -1,5 +1,5 @@
 const joi = require('@hapi/joi');
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.updateQueueConfigurationFactory = ({ lowDb, AppError } = {}) => {
   return {
@@ -14,7 +14,10 @@ exports.updateQueueConfigurationFactory = ({ lowDb, AppError } = {}) => {
         );
         return lowDb.set('configuration', { binlogName, nextPosition }).write();
       } catch (updateQueueError) {
-        throw new AppError({ message: APP_ERROR_MESSAGE.QUEUE.UPDATE_CONFIG, error: updateQueueError });
+        throw new AppError({
+          error: updateQueueError,
+          code: APP_ERROR_CODE.QUEUE_UPDATE_CONFIG,
+        });
       }
     },
   };

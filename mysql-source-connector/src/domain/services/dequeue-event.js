@@ -1,4 +1,4 @@
-const { EVENT_HANDLER_CONFIG, APP_ERROR_MESSAGE } = require('../../constants');
+const { EVENT_HANDLER_CONFIG, APP_ERROR_CODE } = require('../../constants');
 
 exports.dequeueEventFactory = ({
   AppError,
@@ -18,7 +18,7 @@ exports.dequeueEventFactory = ({
         await handleQueueEvent({ event, eventAffectedRowUserField });
       } catch (eventHandlerError) {
         const eventError = new AppError({
-          message: APP_ERROR_MESSAGE.QUEUE.HANDLING_EVENT,
+          code: APP_ERROR_CODE.QUEUE_HANDLING_EVENT,
           error: eventHandlerError,
           context: {
             mysql_trigger_event: event,
@@ -29,7 +29,7 @@ exports.dequeueEventFactory = ({
           addEventToQueue({ event, dlq: true });
         } catch (dlqEventError) {
           throw new AppError({
-            message: APP_ERROR_MESSAGE.QUEUE.ADD_TO_DLQ,
+            code: APP_ERROR_CODE.QUEUE_ADD_TO_DLQ,
             error: dlqEventError,
             context: {
               mysql_trigger_event: event,

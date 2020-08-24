@@ -1,5 +1,5 @@
 const { getQueueName } = require('../helpers/get-queue-name');
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.setQueueFactory = ({ lowDb, AppError } = {}) => {
   return {
@@ -11,7 +11,7 @@ exports.setQueueFactory = ({ lowDb, AppError } = {}) => {
         return lowDb.set(getQueueName({ dlq }), queue).write();
       } catch (setQueueError) {
         throw new AppError({
-          message: APP_ERROR_MESSAGE.QUEUE.SET_ON_LOCAL_DB,
+          code: APP_ERROR_CODE.QUEUE_SET_ON_LOCAL_DB,
           error: setQueueError,
         });
       }

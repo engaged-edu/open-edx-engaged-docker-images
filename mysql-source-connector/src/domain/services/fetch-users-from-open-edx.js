@@ -1,5 +1,5 @@
 const joi = require('@hapi/joi');
-const { APP_ERROR_MESSAGE } = require('../../constants');
+const { APP_ERROR_CODE } = require('../../constants');
 
 /**
  * @param {{mysql: import('mysql').Connection}} params
@@ -27,7 +27,7 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
             if (usersQueryError) {
               return reject(
                 new AppError({
-                  message: APP_ERROR_MESSAGE.OPEN_EDX_MYSQL.FETCH_USERS_QUERY,
+                  code: APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USERS_QUERY,
                   error: usersQueryError,
                 }),
               );
@@ -35,7 +35,7 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
             if (!Array.isArray(users)) {
               return reject(
                 new AppError({
-                  message: APP_ERROR_MESSAGE.OPEN_EDX_MYSQL.FETCH_USERS_QUERY,
+                  code: APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USERS_QUERY,
                   error: new Error('invalid mysql query response'),
                 }),
               );
@@ -45,7 +45,7 @@ exports.fetchUsersFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
         } catch (mysqlError) {
           return reject(
             new AppError({
-              message: APP_ERROR_MESSAGE.OPEN_EDX_MYSQL.FETCH_USERS_QUERY,
+              code: APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USERS_QUERY,
               error: mysqlError,
             }),
           );
