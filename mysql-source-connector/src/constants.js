@@ -45,6 +45,7 @@ exports.APP_ERROR_MESSAGE = Object.freeze({
     INIT_CONFIG: 'Não foi possível inicializar a configuração da fila',
     GET_CONFIG: 'Não foi possível recuperar a configuração da fila',
     UPDATE_CONFIG: 'Não foi possível atualizar a configuração da fila',
+    HANDLING_EVENT: 'Não foi possível processar o evento da fila',
   },
   OPEN_EDX_MYSQL: {
     FETCH_USERS_QUERY: 'Não foi possível obter a lista de alunos do MySQL',
@@ -52,5 +53,9 @@ exports.APP_ERROR_MESSAGE = Object.freeze({
   EVENT: {
     HANDLE: 'Não foi possível processar o evento da fila',
     EMIT_TO_EVENTBRIDGE: 'Não foi possível enviar o evento para o AWS EventBridge',
+    HANDLE_MYSQL: 'Não foi possível processar o evento do MySql',
+  },
+  TRIGGER: {
+    ADD: 'Não foi possível adicionar a trigger para eventos do MySQL',
   },
 });
