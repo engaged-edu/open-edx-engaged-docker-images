@@ -6,6 +6,7 @@ exports.dequeueEventFactory = ({
   removeQueueHeadEvent,
   handleQueueEvent,
   addEventToQueue,
+  apm,
 } = {}) => {
   return {
     dequeueEvent: async () => {
@@ -13,6 +14,7 @@ exports.dequeueEventFactory = ({
       if (!event || typeof event.table !== 'string' || !(event.table in EVENT_HANDLER_CONFIG)) {
         return;
       }
+      apm.startTransaction('dequeue-event', 'db', 'lowdb');
       const { eventAffectedRowUserField } = EVENT_HANDLER_CONFIG[event.table];
       try {
         await handleQueueEvent({ event, eventAffectedRowUserField });
@@ -38,6 +40,7 @@ exports.dequeueEventFactory = ({
         }
       }
       removeQueueHeadEvent();
+      apm.endTransaction(200);
       return;
     },
   };
