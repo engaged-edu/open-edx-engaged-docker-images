@@ -27,6 +27,8 @@ const getLowDBFilePath = (envMode) => path.join(DATA_DIR[envMode], 'lowdb', 'db.
  * @property {string} ENGAGED_AWS_EVENTBRIDGE_BUS_NAME
  * @property {string} ENGAGED_AWS_EVENTBRIDGE_BUS_REGION
  * @property {string} ENGAGED_SERVER_IDENTIFIER
+ * @property {string} APM_SERVER_URL
+ * @property {string} APM_SECRET_TOKEN
  * @property {string} BOOTSTRAP_MODE
  * @property {string} LOWDB_FILE_PATH
  */
