@@ -38,7 +38,7 @@ exports.ERROR_LEVEL = Object.freeze({
 });
 
 exports.APP_ERROR_CODE = new Proxy(
-  Object.freeze({
+  {
     WORKER_LOCAL_DB_START: true,
     WORKER_MYSQL_CONN_START: true,
     WORKER_APPLICATION: true,
@@ -60,7 +60,7 @@ exports.APP_ERROR_CODE = new Proxy(
     TRIGGER_ADD: true,
     MYSQL_EVENTS_TERMINATION: true,
     DEFAULT: 'UNKNOWN_ERROR',
-  }),
+  },
   {
     get(target, key) {
       return key in target ? (typeof target[key] === 'string' ? target[key] : key) : target.DEFAULT;
