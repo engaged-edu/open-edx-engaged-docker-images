@@ -145,6 +145,7 @@ async function container() {
       removeQueueHeadEvent,
       handleQueueEvent,
       AppError,
+      apm,
     });
     const { getQueueConfiguration } = getQueueConfigurationFactory({ lowDb, AppError });
     const { initQueueConfiguration } = initQueueConfigurationFactory({ lowDb, AppError });
@@ -167,9 +168,7 @@ async function container() {
 
     for (;;) {
       await setImmediatePromise();
-      apm.startTransaction('dequeue-event', 'db', 'lowdb');
       await dequeueEvent();
-      apm.endTransaction(200);
     }
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {
