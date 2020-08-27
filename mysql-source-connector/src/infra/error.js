@@ -50,14 +50,16 @@ exports.configAppError = ({ apm, logger } = {}) => {
     }
     track() {
       const error = this.error_origin ? this.error_origin : this;
-      apm.captureError(error, {
-        message: this.message,
-        custom: this.context,
-        labels: {
-          ...this.labels,
-          error_code: this.code,
-        },
-      });
+      if (apm) {
+        apm.captureError(error, {
+          message: this.message,
+          custom: this.context,
+          labels: {
+            ...this.labels,
+            error_code: this.code,
+          },
+        });
+      }
       return this;
     }
     flush() {
