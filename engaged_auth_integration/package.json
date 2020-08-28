@@ -4,7 +4,11 @@
   "description": "Node project to integrate the Open edX auth with EngagED.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "dev": "nodemon src/bootstrap/api.js",
+    "start": "node src/bootstrap/api.js",
+    "clean": "rm -rf node_modules",
+    "test": "npm run test:unit",
+    "test:unit": "nyc --reporter=html --reporter=text mocha src/**/*.spec.js"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
