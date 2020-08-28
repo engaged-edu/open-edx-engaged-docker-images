@@ -1,11 +1,18 @@
-const { ERROR_LEVEL, APP_ERROR_CODE, APP_ERROR_MESSAGE } = require('../constants');
+const { ERROR_LEVEL, APP_ERROR_CODE, APP_ERROR_MESSAGE, APP_ERROR_KIND } = require('../constants');
 
 /**
  * @param {{ logger: import('pino').Logger }} params
  */
 exports.configAppError = ({ apm, logger } = {}) => {
   class AppError extends Error {
-    constructor({ error, kind, code = APP_ERROR_CODE.DEFAULT, level = ERROR_LEVEL.ERROR, labels = {}, context = {} } = {}) {
+    constructor({
+      error,
+      kind = APP_ERROR_KIND.DEFAULT,
+      code = APP_ERROR_CODE.DEFAULT,
+      level = ERROR_LEVEL.ERROR,
+      labels = {},
+      context = {},
+    } = {}) {
       const message = APP_ERROR_MESSAGE[code];
       if (error instanceof AppError) {
         error.labels = {
@@ -23,6 +30,7 @@ exports.configAppError = ({ apm, logger } = {}) => {
       Error.captureStackTrace(this, this.constructor);
       this.name = this.constructor.name;
       this.code = code;
+      this.kind = kind;
       this.level = level;
       this.labels = labels;
       this.context = context;
@@ -41,6 +49,7 @@ exports.configAppError = ({ apm, logger } = {}) => {
       logger.error({
         level: this.level,
         error_name: this.name,
+        error_kind: this.kind,
         error_message: this.message,
         error_parents: this.parents,
         error_origin_name: this.getOriginalErrorName(),
@@ -57,6 +66,7 @@ exports.configAppError = ({ apm, logger } = {}) => {
           labels: {
             ...this.labels,
             error_code: this.code,
+            error_kind: this.kind,
           },
         });
       }
