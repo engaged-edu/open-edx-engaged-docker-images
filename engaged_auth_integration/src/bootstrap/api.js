@@ -89,7 +89,7 @@ const container = async () => {
     const { logger } = startLog({ ENV });
     containerLogger = logger;
 
-    const { AppError } = configAppError({ logger });
+    const { AppError } = configAppError({ logger, apm });
     ContainerError = AppError;
 
     const { mysql } = await connectToMySQL({ ENV }).catch((mysqlConnectionError) => {
