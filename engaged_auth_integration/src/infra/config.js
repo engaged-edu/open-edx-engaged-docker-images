@@ -36,6 +36,8 @@ const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
         .string()
         .default(ENV_MODE.DEVELOPMENT)
         .valid(...ENV_MODES),
+      API_SERVER_PORT: joi.number().port().required(),
+      API_SECRET_KEY: joi.string().required(),
       OPEN_EDX_MYSQL_HOST: joi.string().required(),
       OPEN_EDX_MYSQL_DATABASE: joi.string().default(OPEN_EDX_MYSQL_DEFAULT_SCHEMA),
       OPEN_EDX_MYSQL_USERNAME: joi.string().required(),
