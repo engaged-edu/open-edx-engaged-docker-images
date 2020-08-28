@@ -1,3 +1,4 @@
+const { startAPM, terminateAPM } = require('../infra/apm');
 const { BOOTSTRAP_MODE, ERROR_LEVEL, APP_ERROR_MESSAGE, APP_ERROR_CODE } = require('../constants');
 const { loadEnvironmentVariables } = require('../infra/config');
 const { startLog } = require('../infra/logger');
@@ -15,7 +16,7 @@ const { apiRouterFactory } = require('../infra/api/router');
 const { startAPIServer, stopAPIServer } = require('../infra/api/api');
 
 const container = async () => {
-  let ContainerError, containerLogger, containerMySQL, apiContainer;
+  let ContainerError, containerLogger, containerMySQL, apiContainer, containerAPM;
 
   const handleTerminationError = ({ error, code } = {}) => {
     const message = APP_ERROR_MESSAGE[code];
@@ -49,6 +50,7 @@ const container = async () => {
     try {
       await terminateMySQL({ mysql: containerMySQL, handleTerminationError });
       await stopAPIServer({ api: apiContainer, handleTerminationError });
+      await terminateAPM({ apm: containerAPM, handleTerminationError });
     } catch (onCloseConnError) {
       if (onCloseConnError instanceof Error) {
         handleTerminationError({
@@ -80,6 +82,9 @@ const container = async () => {
 
   try {
     const { ENV } = loadEnvironmentVariables({ bootstrapMode: BOOTSTRAP_MODE.API });
+
+    const { apm } = startAPM({ ENV });
+    containerAPM = apm;
 
     const { logger } = startLog({ ENV });
     containerLogger = logger;
