@@ -104,7 +104,7 @@ async function container() {
     const { logger } = startLog({ ENV });
     containerLogger = logger;
 
-    const { AppError } = configAppError({ logger });
+    const { AppError } = configAppError({ logger, apm });
     ContainerError = AppError;
 
     const { lowDb } = await startLowDb({ ENV }).catch((lowDbStartupError) => {
