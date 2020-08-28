@@ -1,17 +1,16 @@
-
 exports.apiRouterFactory = ({
   requestAuthenticationAPIMiddleware,
   responseDesignAPIMiddleware,
-  createAccessTokenAPIRoute
+  createAccessTokenAPIRoute,
 } = {}) => {
   return {
     apiRouter: ({ app }) => {
       app.use(responseDesignAPIMiddleware);
       app.use(requestAuthenticationAPIMiddleware);
-      app.post('/auth/access_token', requestAuthenticationAPIMiddleware);
+      app.post('/auth/access_token', createAccessTokenAPIRoute);
       app.use((error, req, res, next) => {
         return res.catch(error);
       });
-    }
-  }
-}
+    },
+  };
+};
