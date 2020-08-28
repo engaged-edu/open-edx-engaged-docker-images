@@ -40,7 +40,7 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
             statement,
             [
               randomstring.generate(30),
-              moment(moment.now()).add(1, 'day').toDate(),
+              moment(moment.now()).add(7, 'day').toDate(),
               'user_id email profile',
               1,
               user_id,
@@ -57,7 +57,7 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
                   }),
                 );
               }
-              if (!result) {
+              if (!result || !result.insertId) {
                 return reject(
                   new AppError({
                     code: APP_ERROR_CODE.INSERT_OPEN_EDX_AUTH_TOKEN,
@@ -65,7 +65,7 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
                   }),
                 );
               }
-              return resolve({ accessToken: { ...result } });
+              return resolve({ accessTokenResult: { ...result, token_id: result.insertId } });
             },
           );
         } catch (mysqlError) {

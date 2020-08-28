@@ -1,7 +1,11 @@
-const { APP_ERROR_CODE } = require('../../../../engaged-auth-integration/src/constants');
-const { APP_ERROR_KIND } = require('../../constants');
+const { APP_ERROR_CODE, APP_ERROR_KIND } = require('../../constants');
 
-exports.createAccessTokenFromUserEmailFactory = ({ AppError, createOpenEdxUserAccessToken, fetchUserFromOpenEdx }) => {
+exports.createAccessTokenFromUserEmailFactory = ({
+  AppError,
+  createOpenEdxUserAccessToken,
+  fetchUserFromOpenEdx,
+  fetchUserTokenFromOpenEdx,
+}) => {
   return {
     createAccessTokenFromUserEmail: async ({ email } = {}) => {
       try {
@@ -13,7 +17,9 @@ exports.createAccessTokenFromUserEmailFactory = ({ AppError, createOpenEdxUserAc
             kind: APP_ERROR_KIND.NOT_FOUND,
           });
         }
-        const { accessToken } = await createOpenEdxUserAccessToken({ userId: user.id });
+        const { accessTokenResult } = await createOpenEdxUserAccessToken({ user_id: user.id });
+        const { token_id } = accessTokenResult;
+        const { accessToken } = await fetchUserTokenFromOpenEdx({ token_id });
         return { user, accessToken };
       } catch (createAccessTokenFromUserEmailError) {
         throw new AppError({
