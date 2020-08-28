@@ -65,7 +65,7 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
                   }),
                 );
               }
-              return resolve({ ...result });
+              return resolve({ accessToken: { ...result } });
             },
           );
         } catch (mysqlError) {
