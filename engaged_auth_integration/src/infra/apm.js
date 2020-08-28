@@ -1,4 +1,5 @@
 const apmAgent = require('elastic-apm-node');
+const { APP_ERROR_CODE } = require('../constants');
 
 exports.startAPM = ({ ENV }) => {
   apmAgent.start({
@@ -18,7 +19,7 @@ exports.terminateAPM = async ({ apm, handleTerminationError } = {}) => {
   await new Promise((resolve) => {
     apm.flush((flushError) => {
       if (flushError) {
-        handleTerminationError({ error: flushError, code: '' });
+        handleTerminationError({ error: flushError, code: APP_ERROR_CODE.APM_TERMINATE });
       }
       return resolve();
     });

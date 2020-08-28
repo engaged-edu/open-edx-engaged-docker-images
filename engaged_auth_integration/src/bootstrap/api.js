@@ -5,6 +5,8 @@ const { configAppError } = require('../infra/error');
 
 const { connectToMySQL, terminateMySQL } = require('../infra/db/mysql');
 
+const { fetchUserFromOpenEdxFactory } = require('../domain/services/fetch-user-from-open-edx');
+
 const container = async () => {
   let ContainerError, containerLogger, containerMySQL;
 
@@ -43,12 +45,12 @@ const container = async () => {
       if (onCloseConnError instanceof Error) {
         handleTerminationError({
           error: onCloseConnError,
-          code: '',
+          code: APP_ERROR_CODE.API_END_APPLICATION,
         });
       } else {
         handleTerminationError({
           error: new Error('unknown error during container termination'),
-          code: '',
+          code: APP_ERROR_CODE.API_END_APPLICATION_UNKNOWN,
         });
       }
     }
@@ -64,7 +66,7 @@ const container = async () => {
     });
   });
   process.on('uncaughtException', async function (uncaughtError) {
-    handleTerminationError({ error: uncaughtError, code: APP_ERROR_CODE.WORKER_UNCAUGHT_EXCEPTION });
+    handleTerminationError({ error: uncaughtError, code: APP_ERROR_CODE.API_UNCAUGHT_EXCEPTION });
     terminateContainer({ code: 1 });
   });
 
@@ -81,19 +83,21 @@ const container = async () => {
       throw new AppError({
         level: ERROR_LEVEL.FATAL,
         error: mysqlConnectionError,
-        code: APP_ERROR_CODE.WORKER_MYSQL_CONN_START,
+        code: APP_ERROR_CODE.API_MYSQL_CONN_START,
       });
     });
     containerMySQL = mysql;
+
+    const { fetchUsersFromOpenEdx } = fetchUserFromOpenEdxFactory({ mysql, AppError });
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {
       handleTerminationError({
-        code: '',
+        code: APP_ERROR_CODE.API_APPLICATION,
         error: containerBootstrapError,
       });
     } else {
       handleTerminationError({
-        code: '',
+        code: APP_ERROR_CODE.API_APPLICATION_UNKNOWN,
         error: new Error('unexpected container error'),
       });
     }

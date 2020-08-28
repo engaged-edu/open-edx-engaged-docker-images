@@ -21,6 +21,15 @@ exports.ERROR_LEVEL = Object.freeze({
 
 exports.APP_ERROR_CODE = new Proxy(
   {
+    API_MYSQL_CONN_START: true,
+    API_MYSQL_TERMINATE: true,
+    API_APPLICATION: true,
+    API_APPLICATION_UNKNOWN: true,
+    API_END_APPLICATION: true,
+    API_END_APPLICATION_UNKNOWN: true,
+    API_UNCAUGHT_EXCEPTION: true,
+    OPEN_EDX_MYSQL_FETCH_USER_QUERY: true,
+    APM_TERMINATE: true,
     DEFAULT: 'UNKNOWN_ERROR',
   },
   {
@@ -32,6 +41,17 @@ exports.APP_ERROR_CODE = new Proxy(
 
 exports.APP_ERROR_MESSAGE = new Proxy(
   Object.freeze({
+    [this.APP_ERROR_CODE.API_MYSQL_CONN_START]:
+      'Não foi possível inicar a conexão com o banco de dados MySQL do Open edX',
+    [this.APP_ERROR_CODE.API_MYSQL_TERMINATE]:
+      'Não foi possível finalizar a conexão com o banco de dados MySQL do Open edX',
+    [this.APP_ERROR_CODE.API_APPLICATION]: 'Falha crítica no container da aplicação',
+    [this.APP_ERROR_CODE.API_APPLICATION_UNKNOWN]: 'Falha crítica desconhecida no container da aplicação',
+    [this.APP_ERROR_CODE.API_END_APPLICATION]: 'Erro ao encerrar a aplicação',
+    [this.APP_ERROR_CODE.API_END_APPLICATION_UNKNOWN]: 'Erro desconhecido ao encerrar a aplicação',
+    [this.APP_ERROR_CODE.API_UNCAUGHT_EXCEPTION]: 'Erro não tratado',
+    [this.APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USER_QUERY]: 'Não foi possível obter o aluno do MySQL',
+    [this.APP_ERROR_CODE.APM_TERMINATE]: 'Não foi possível fechar a conexão com o APM',
     DEFAULT: 'Erro desconhecido',
   }),
   {

@@ -27,7 +27,7 @@ exports.fetchUserFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
             if (usersQueryError) {
               return reject(
                 new AppError({
-                  code: '',
+                  code: APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USER_QUERY,
                   error: usersQueryError,
                 }),
               );
@@ -35,7 +35,7 @@ exports.fetchUserFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
             if (!Array.isArray(result)) {
               return reject(
                 new AppError({
-                  code: '',
+                  code: APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USER_QUERY,
                   error: new Error('invalid mysql query response'),
                 }),
               );
@@ -48,7 +48,7 @@ exports.fetchUserFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
         } catch (mysqlError) {
           return reject(
             new AppError({
-              code: '',
+              code: APP_ERROR_CODE.OPEN_EDX_MYSQL_FETCH_USER_QUERY,
               error: mysqlError,
             }),
           );

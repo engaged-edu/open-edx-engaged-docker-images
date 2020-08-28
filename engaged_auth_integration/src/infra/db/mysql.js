@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const { APP_ERROR_CODE } = require('../../constants');
 
 exports.connectToMySQL = ({ ENV } = {}) => {
   return new Promise((resolve, reject) => {
@@ -28,7 +29,7 @@ exports.terminateMySQL = async ({ mysql: connection, handleTerminationError } = 
   await new Promise((resolve) => {
     connection.end((connectionError) => {
       if (connectionError) {
-        handleTerminationError({ error: connectionError, code: '' });
+        handleTerminationError({ error: connectionError, code: APP_ERROR_CODE.API_MYSQL_TERMINATE });
       }
       return resolve();
     });
