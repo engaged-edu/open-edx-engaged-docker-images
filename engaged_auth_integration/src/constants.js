@@ -36,7 +36,7 @@ exports.APP_ERROR_KIND = new Proxy(
 
 exports.APP_ERROR_KIND_STATEGY = Object.freeze({
   [this.APP_ERROR_KIND.FORBIDDEN]: { code: 403, status: this.APP_ERROR_KIND.FORBIDDEN },
-  [this.APP_ERROR_KIND.NOT_FOUND]: { code: 400, status: this.APP_ERROR_KIND.NOT_FOUND },
+  [this.APP_ERROR_KIND.NOT_FOUND]: { code: 404, status: this.APP_ERROR_KIND.NOT_FOUND },
   [this.APP_ERROR_KIND.VALIDATION]: { code: 400, status: this.APP_ERROR_KIND.VALIDATION },
   [this.APP_ERROR_KIND.UNEXPECTED]: { code: 500, status: this.APP_ERROR_KIND.UNEXPECTED },
   DEFAULT: { code: 500, status: this.APP_ERROR_KIND.DEFAULT },

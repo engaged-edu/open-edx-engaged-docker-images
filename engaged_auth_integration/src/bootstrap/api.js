@@ -8,7 +8,6 @@ const { connectToMySQL, terminateMySQL } = require('../infra/db/mysql');
 
 const { fetchUserFromOpenEdxFactory } = require('../domain/services/fetch-open-edx-user');
 const { createOpenEdxUserAccessTokenFactory } = require('../domain/services/create-open-edx-user-access-token');
-const { fetchUserTokenFromOpenEdxFactory } = require('../domain/services/fetch-open-edx-user-token');
 const { createAccessTokenFromUserEmailFactory } = require('../domain/use-cases/create-access-token-from-user-email');
 const { createAccessTokenAPIRouteFactory } = require('../infra/api/routes/create-access-token');
 const { requestAuthenticationAPIMiddlewareFactory } = require('../infra/api/middleware/request-authentication');
@@ -104,13 +103,11 @@ const container = async () => {
 
     const { fetchUserFromOpenEdx } = fetchUserFromOpenEdxFactory({ mysql, AppError });
     const { createOpenEdxUserAccessToken } = createOpenEdxUserAccessTokenFactory({ mysql, AppError });
-    const { fetchUserTokenFromOpenEdx } = fetchUserTokenFromOpenEdxFactory({ mysql, AppError });
 
     const { createAccessTokenFromUserEmail } = createAccessTokenFromUserEmailFactory({
       AppError,
       createOpenEdxUserAccessToken,
       fetchUserFromOpenEdx,
-      fetchUserTokenFromOpenEdx,
     });
 
     const { createAccessTokenAPIRoute } = createAccessTokenAPIRouteFactory({

@@ -1,11 +1,6 @@
 const { APP_ERROR_CODE, APP_ERROR_KIND } = require('../../constants');
 
-exports.createAccessTokenFromUserEmailFactory = ({
-  AppError,
-  createOpenEdxUserAccessToken,
-  fetchUserFromOpenEdx,
-  fetchUserTokenFromOpenEdx,
-}) => {
+exports.createAccessTokenFromUserEmailFactory = ({ AppError, createOpenEdxUserAccessToken, fetchUserFromOpenEdx }) => {
   return {
     createAccessTokenFromUserEmail: async ({ email } = {}) => {
       try {
@@ -17,9 +12,7 @@ exports.createAccessTokenFromUserEmailFactory = ({
             kind: APP_ERROR_KIND.NOT_FOUND,
           });
         }
-        const { accessTokenResult } = await createOpenEdxUserAccessToken({ user_id: user.id });
-        const { token_id } = accessTokenResult;
-        const { accessToken } = await fetchUserTokenFromOpenEdx({ token_id });
+        const { accessToken } = await createOpenEdxUserAccessToken({ user_id: user.id });
         return { user, accessToken };
       } catch (createAccessTokenFromUserEmailError) {
         throw new AppError({

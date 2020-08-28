@@ -36,10 +36,11 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
               })
               .required(),
           );
+          const token = randomstring.generate(30);
           mysql.query(
             statement,
             [
-              randomstring.generate(30),
+              token,
               moment(moment.now()).add(7, 'day').toDate(),
               'user_id email profile',
               1,
@@ -65,7 +66,7 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
                   }),
                 );
               }
-              return resolve({ accessTokenResult: { ...result, token_id: result.insertId } });
+              return resolve({ accessToken: token });
             },
           );
         } catch (mysqlError) {
