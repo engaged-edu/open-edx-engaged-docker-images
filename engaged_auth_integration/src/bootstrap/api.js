@@ -5,10 +5,17 @@ const { configAppError } = require('../infra/error');
 
 const { connectToMySQL, terminateMySQL } = require('../infra/db/mysql');
 
-const { fetchUserFromOpenEdxFactory } = require('../domain/services/fetch-user-from-open-edx');
+const { fetchUserFromOpenEdxFactory } = require('../domain/services/fetch-open-edx-user');
+const { createOpenEdxUserAccessTokenFactory } = require('../domain/services/create-open-edx-user-access-token');
+const { createAccessTokenFromUserEmailFactory } = require('../domain/use-cases/create-access-token-from-user-email');
+const { createAccessTokenAPIRouteFactory } = require('../infra/api/routes/create-access-token');
+const { requestAuthenticationAPIMiddlewareFactory } = require('../infra/api/middleware/request-authentication');
+const { responseDesignAPIMiddlewareFactory } = require('../infra/api/middleware/response-design');
+const { apiRouterFactory } = require('../infra/api/router');
+const { startAPIServer, stopAPIServer } = require('../infra/api/api');
 
 const container = async () => {
-  let ContainerError, containerLogger, containerMySQL;
+  let ContainerError, containerLogger, containerMySQL, apiContainer;
 
   const handleTerminationError = ({ error, code } = {}) => {
     const message = APP_ERROR_MESSAGE[code];
@@ -41,6 +48,7 @@ const container = async () => {
   const terminateContainer = async ({ code = 2 } = {}) => {
     try {
       await terminateMySQL({ mysql: containerMySQL, handleTerminationError });
+      await stopAPIServer({ api: apiContainer, handleTerminationError });
     } catch (onCloseConnError) {
       if (onCloseConnError instanceof Error) {
         handleTerminationError({
@@ -88,7 +96,31 @@ const container = async () => {
     });
     containerMySQL = mysql;
 
-    const { fetchUsersFromOpenEdx } = fetchUserFromOpenEdxFactory({ mysql, AppError });
+    const { fetchUserFromOpenEdx } = fetchUserFromOpenEdxFactory({ mysql, AppError });
+    const { createOpenEdxUserAccessToken } = createOpenEdxUserAccessTokenFactory({ mysql, AppError });
+
+    const { createAccessTokenFromUserEmail } = createAccessTokenFromUserEmailFactory({
+      AppError,
+      createOpenEdxUserAccessToken,
+      fetchUserFromOpenEdx,
+    });
+
+    const { createAccessTokenAPIRoute } = createAccessTokenAPIRouteFactory({
+      AppError,
+      createAccessTokenFromUserEmail,
+    });
+
+    const { requestAuthenticationAPIMiddleware } = requestAuthenticationAPIMiddlewareFactory({ AppError, ENV });
+    const { responseDesignAPIMiddleware } = responseDesignAPIMiddlewareFactory({ AppError });
+
+    const { apiRouter } = apiRouterFactory({
+      requestAuthenticationAPIMiddleware,
+      responseDesignAPIMiddleware,
+      createAccessTokenAPIRoute,
+    });
+
+    const { api } = startAPIServer({ ENV, apiRouter });
+    apiContainer = api;
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {
       handleTerminationError({
