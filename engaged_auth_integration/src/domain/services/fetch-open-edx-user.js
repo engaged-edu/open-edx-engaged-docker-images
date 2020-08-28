@@ -20,9 +20,6 @@ exports.fetchUserFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
               })
               .required(),
           );
-          if (email.length === 0) {
-            return resolve({ user: undefined });
-          }
           mysql.query(`select * from auth_user where email like '${email}'`, (usersQueryError, result) => {
             if (usersQueryError) {
               return reject(

@@ -5,7 +5,7 @@ const { ERROR_LEVEL, APP_ERROR_CODE, APP_ERROR_MESSAGE } = require('../constants
  */
 exports.configAppError = ({ apm, logger } = {}) => {
   class AppError extends Error {
-    constructor({ error, code = APP_ERROR_CODE.DEFAULT, level = ERROR_LEVEL.ERROR, labels = {}, context = {} } = {}) {
+    constructor({ error, kind, code = APP_ERROR_CODE.DEFAULT, level = ERROR_LEVEL.ERROR, labels = {}, context = {} } = {}) {
       const message = APP_ERROR_MESSAGE[code];
       if (error instanceof AppError) {
         error.labels = {

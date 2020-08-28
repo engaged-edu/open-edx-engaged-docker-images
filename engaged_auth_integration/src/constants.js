@@ -19,6 +19,13 @@ exports.ERROR_LEVEL = Object.freeze({
   FATAL: 'fatal',
 });
 
+exports.APP_ERROR_KIND = {
+  FORBIDDEN: 'forbidden',
+  NOT_FOUND: 'not-found',
+  VALIDATION: 'validation',
+  UNEXPECTED: 'unexpected',
+}
+
 exports.APP_ERROR_CODE = new Proxy(
   {
     API_MYSQL_CONN_START: true,
