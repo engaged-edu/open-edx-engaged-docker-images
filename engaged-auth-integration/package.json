@@ -1,5 +1,5 @@
 {
-  "name": "engaged_auth_integration",
+  "name": "engaged-auth-integration",
   "version": "1.0.0",
   "description": "Node project to integrate the Open edX auth with EngagED.",
   "main": "index.js",
