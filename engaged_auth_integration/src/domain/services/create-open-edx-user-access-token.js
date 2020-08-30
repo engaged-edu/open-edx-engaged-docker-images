@@ -1,9 +1,9 @@
 const joi = require('@hapi/joi');
-const randomstring = require('randomstring');
 const moment = require('moment');
+const randomstring = require('randomstring');
 const { APP_ERROR_CODE } = require('../../constants');
 
-const statement = `
+const QUERY_STATEMENT = `
 INSERT INTO openedx.oauth2_provider_accesstoken 
 (
   token,
@@ -17,6 +17,13 @@ INSERT INTO openedx.oauth2_provider_accesstoken
 ) VALUES(?,?,?,?,?,?,?,?)
 `.trim();
 
+const DEFAULT_TOKEN_SCOPE = 'user_id email profile';
+const DEFAULT_TOKEN_APPLICATION_ID = 1;
+const EXPIRE_TOKEN_IN = {
+  AMOUNT: 7,
+  UNIT: 'day',
+};
+
 /**
  * @param {{mysql: import('mysql').Connection}} params
  */
@@ -26,29 +33,22 @@ exports.createOpenEdxUserAccessTokenFactory = ({ mysql, AppError } = {}) => {
       return new Promise((resolve, reject) => {
         try {
           /**
-           * @type {{ user_id: '' }}
+           * @type {{ user_id: string }}
            */
           const { user_id } = joi.attempt(
             params,
             joi
               .object({
-                user_id: joi.number().required(),
+                user_id: joi.number().integer().positive().required(),
               })
               .required(),
           );
+          const now = new Date();
+          const expiration = moment(now).add(EXPIRE_TOKEN_IN.AMOUNT, EXPIRE_TOKEN_IN.UNIT).toDate();
           const token = randomstring.generate(30);
           mysql.query(
-            statement,
-            [
-              token,
-              moment(moment.now()).add(7, 'day').toDate(),
-              'user_id email profile',
-              1,
-              user_id,
-              new Date(),
-              new Date(),
-              null,
-            ],
+            QUERY_STATEMENT,
+            [token, expiration, DEFAULT_TOKEN_SCOPE, DEFAULT_TOKEN_APPLICATION_ID, user_id, now, now, null],
             (usersQueryError, result) => {
               if (usersQueryError) {
                 return reject(

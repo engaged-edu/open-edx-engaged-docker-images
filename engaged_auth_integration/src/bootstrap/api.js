@@ -124,7 +124,7 @@ const container = async () => {
       createAccessTokenAPIRoute,
     });
 
-    const { api, server } = await startAPIServer({ ENV, apiRouter });
+    const { server } = await startAPIServer({ ENV, apiRouter });
     apiContainer = server;
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {

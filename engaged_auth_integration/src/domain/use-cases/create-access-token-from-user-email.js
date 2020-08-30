@@ -8,7 +8,7 @@ exports.createAccessTokenFromUserEmailFactory = ({ AppError, createOpenEdxUserAc
         if (!user) {
           throw new AppError({
             code: APP_ERROR_CODE.EDX_USER_NOT_FOUND,
-            error: new Error('User was not found'),
+            error: new Error('user not found'),
             kind: APP_ERROR_KIND.NOT_FOUND,
           });
         }
