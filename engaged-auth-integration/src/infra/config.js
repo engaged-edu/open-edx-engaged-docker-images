@@ -1,7 +1,7 @@
 const env = require('dotenv');
 const joi = require('@hapi/joi');
-const { ENV_MODE, ENV_MODES, BOOTSTRAP_MODES, OPEN_EDX_MYSQL_DEFAULT_SCHEMA } = require('../constants');
 const { version } = require('../../package.json');
+const { ENV_MODE, ENV_MODES, BOOTSTRAP_MODES, OPEN_EDX_MYSQL_DEFAULT_SCHEMA } = require('../constants');
 /**
  * @typedef {Object} ENV
  * @property {string} NODE_ENV
@@ -16,12 +16,12 @@ const { version } = require('../../package.json');
 
 /**
  *
- * @param {*} param0
+ * @param {*} param
  * @returns {{ ENV: ENV }}
  */
-const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
+exports.loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
   if (!BOOTSTRAP_MODES.includes(bootstrapMode)) {
-    throw new Error('Bootstrap mode is required');
+    throw new Error('bootstrap mode is required');
   }
 
   const { parsed: rawEnvVars, error: envVarsLoadError } = env.config();
@@ -56,9 +56,4 @@ const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
   envVars.BOOTSTRAP_MODE = bootstrapMode;
 
   return { ENV: envVars };
-};
-
-module.exports = {
-  ENV_MODE,
-  loadEnvironmentVariables,
 };

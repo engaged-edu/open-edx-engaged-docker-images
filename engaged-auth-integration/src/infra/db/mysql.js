@@ -1,7 +1,7 @@
 const mysql = require('mysql');
-const { APP_ERROR_CODE } = require('../../constants');
+const { APP_ERROR_CODE, APP_ERROR_KIND, ERROR_LEVEL } = require('../../constants');
 
-exports.connectToMySQL = ({ ENV } = {}) => {
+exports.connectToMySQL = ({ ENV, AppError } = {}) => {
   return new Promise((resolve, reject) => {
     try {
       const connection = mysql.createConnection({
@@ -16,9 +16,16 @@ exports.connectToMySQL = ({ ENV } = {}) => {
         }
         return resolve({ mysql: connection });
       });
-    } catch (dbError) {
-      return reject(dbError);
+    } catch (error) {
+      return reject(error);
     }
+  }).catch((dbError) => {
+    throw new AppError({
+      error: dbError,
+      level: ERROR_LEVEL.FATAL,
+      kind: APP_ERROR_KIND.FATAL,
+      code: APP_ERROR_CODE.API_MYSQL_CONN_START,
+    });
   });
 };
 

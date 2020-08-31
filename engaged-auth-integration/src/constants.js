@@ -4,13 +4,11 @@
  * @returns {T}
  */
 const wrapProxy = (obj) =>
-  Object.freeze(
-    new Proxy(obj, {
-      get(target, key) {
-        return key in target ? (typeof target[key] === 'string' ? target[key] : key) : target.DEFAULT;
-      },
-    }),
-  );
+  new Proxy(obj, {
+    get(target, key) {
+      return key in target ? (typeof target[key] === 'string' ? target[key] : key) : target.DEFAULT;
+    },
+  });
 
 exports.BOOTSTRAP_MODE = {
   API: 'api',
@@ -34,6 +32,7 @@ exports.ERROR_LEVEL = Object.freeze({
 });
 
 exports.APP_ERROR_KIND = wrapProxy({
+  FATAL: true,
   FORBIDDEN: true,
   NOT_FOUND: true,
   VALIDATION: true,
@@ -41,11 +40,12 @@ exports.APP_ERROR_KIND = wrapProxy({
   DEFAULT: 'INTERNAL',
 });
 
-exports.APP_ERROR_KIND_STATEGY = wrapProxy({
+exports.APP_ERROR_KIND_STATEGY = Object.freeze({
   [this.APP_ERROR_KIND.FORBIDDEN]: { code: 403, status: this.APP_ERROR_KIND.FORBIDDEN },
   [this.APP_ERROR_KIND.NOT_FOUND]: { code: 404, status: this.APP_ERROR_KIND.NOT_FOUND },
   [this.APP_ERROR_KIND.VALIDATION]: { code: 400, status: this.APP_ERROR_KIND.VALIDATION },
   [this.APP_ERROR_KIND.UNEXPECTED]: { code: 500, status: this.APP_ERROR_KIND.UNEXPECTED },
+  [this.APP_ERROR_KIND.FATAL]: { code: 502, status: this.APP_ERROR_KIND.UNEXPECTED },
   DEFAULT: { code: 500, status: this.APP_ERROR_KIND.DEFAULT },
 });
 
@@ -58,6 +58,7 @@ exports.APP_ERROR_CODE = wrapProxy({
   API_END_APPLICATION: true,
   API_END_APPLICATION_UNKNOWN: true,
   API_UNCAUGHT_EXCEPTION: true,
+  API_PARAMS_VALIDATION: true,
   OPEN_EDX_MYSQL_FETCH_USER_QUERY: true,
   OPEN_EDX_MYSQL_FETCH_USER_TOKEN_QUERY: true,
   APM_TERMINATE: true,
@@ -70,6 +71,7 @@ exports.APP_ERROR_CODE = wrapProxy({
 });
 
 exports.APP_ERROR_MESSAGE = wrapProxy({
+  [this.API_PARAMS_VALIDATION]: 'Parâmetros informados inválidos',
   [this.APP_ERROR_CODE.API_START]: 'Falha ao iniciar o servidor de API',
   [this.APP_ERROR_CODE.API_MYSQL_CONN_START]:
     'Não foi possível inicar a conexão com o banco de dados MySQL do Open edX',

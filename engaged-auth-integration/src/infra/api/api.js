@@ -8,9 +8,7 @@ exports.startAPIServer = ({ ENV, apiRouter, AppError } = {}) => {
     apiRouter({ app });
     const server = app.listen(ENV.API_SERVER_PORT, (serverError) => {
       if (serverError) {
-        return reject(
-          new AppError({ error: serverError, kind: APP_ERROR_KIND.DEFAULT, CODE: APP_ERROR_CODE.API_START }),
-        );
+        return reject(new AppError({ error: serverError, kind: APP_ERROR_KIND.FATAL, CODE: APP_ERROR_CODE.API_START }));
       }
       return resolve({ app, server });
     });

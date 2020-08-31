@@ -2,7 +2,6 @@
 FROM node:erbium-alpine
 WORKDIR /usr/app
 COPY ./package.json ./yarn.lock ./
-RUN yarn install
-COPY ./ ./
-EXPOSE 3000
+RUN yarn install --production
+COPY ./src ./src
 CMD ["yarn", "start"]

@@ -6,7 +6,7 @@ exports.requestAuthenticationAPIMiddlewareFactory = ({ ENV, AppError }) => {
       if (req.headers['authorization'] !== ENV.API_SECRET_KEY) {
         return res.catch(
           new AppError({
-            error: new Error('Missing secret key'),
+            error: new Error('missing secret key'),
             code: APP_ERROR_CODE.NO_SECRET_KEY,
             kind: APP_ERROR_KIND.FORBIDDEN,
           }),

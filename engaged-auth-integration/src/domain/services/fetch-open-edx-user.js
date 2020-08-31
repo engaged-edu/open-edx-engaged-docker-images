@@ -37,10 +37,12 @@ exports.fetchUserFromOpenEdxFactory = ({ mysql, AppError } = {}) => {
                 }),
               );
             }
+            let user = undefined;
             if (result.length > 0) {
-              return resolve({ user: { ...result[0] } });
+              user = { ...result[0] };
+              delete user.password;
             }
-            return resolve({ user: undefined });
+            return resolve({ user });
           });
         } catch (mysqlError) {
           return reject(

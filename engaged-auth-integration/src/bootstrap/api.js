@@ -1,22 +1,21 @@
 const { startAPM, terminateAPM } = require('../infra/apm');
-const { BOOTSTRAP_MODE, ERROR_LEVEL, APP_ERROR_MESSAGE, APP_ERROR_CODE } = require('../constants');
-const { loadEnvironmentVariables } = require('../infra/config');
+
 const { startLog } = require('../infra/logger');
 const { configAppError } = require('../infra/error');
-
-const { connectToMySQL, terminateMySQL } = require('../infra/db/mysql');
-
-const { fetchUserFromOpenEdxFactory } = require('../domain/services/fetch-open-edx-user');
-const { createOpenEdxUserAccessTokenFactory } = require('../domain/services/create-open-edx-user-access-token');
-const { createAccessTokenFromUserEmailFactory } = require('../domain/use-cases/create-access-token-from-user-email');
-const { createAccessTokenAPIRouteFactory } = require('../infra/api/routes/create-access-token');
-const { requestAuthenticationAPIMiddlewareFactory } = require('../infra/api/middleware/request-authentication');
-const { responseDesignAPIMiddlewareFactory } = require('../infra/api/middleware/response-design');
 const { apiRouterFactory } = require('../infra/api/router');
+const { loadEnvironmentVariables } = require('../infra/config');
 const { startAPIServer, stopAPIServer } = require('../infra/api/api');
+const { connectToMySQL, terminateMySQL } = require('../infra/db/mysql');
+const { fetchUserFromOpenEdxFactory } = require('../domain/services/fetch-open-edx-user');
+const { createAccessTokenAPIRouteFactory } = require('../infra/api/routes/create-access-token');
+const { responseDesignAPIMiddlewareFactory } = require('../infra/api/middleware/response-design');
+const { BOOTSTRAP_MODE, ERROR_LEVEL, APP_ERROR_MESSAGE, APP_ERROR_CODE } = require('../constants');
+const { createOpenEdxUserAccessTokenFactory } = require('../domain/services/create-open-edx-user-access-token');
+const { requestAuthenticationAPIMiddlewareFactory } = require('../infra/api/middleware/request-authentication');
+const { createAccessTokenFromUserEmailFactory } = require('../domain/use-cases/create-access-token-from-user-email');
 
 const container = async () => {
-  let ContainerError, containerLogger, containerMySQL, apiContainer, containerAPM;
+  let ContainerError, containerLogger, containerMySQL, containerServer, containerAPM;
 
   const handleTerminationError = ({ error, code } = {}) => {
     const message = APP_ERROR_MESSAGE[code];
@@ -49,7 +48,7 @@ const container = async () => {
   const terminateContainer = async ({ code = 2 } = {}) => {
     try {
       await terminateMySQL({ mysql: containerMySQL, handleTerminationError });
-      await stopAPIServer({ api: apiContainer, handleTerminationError });
+      await stopAPIServer({ server: containerServer, handleTerminationError });
       await terminateAPM({ apm: containerAPM, handleTerminationError });
     } catch (onCloseConnError) {
       if (onCloseConnError instanceof Error) {
@@ -92,13 +91,7 @@ const container = async () => {
     const { AppError } = configAppError({ logger, apm });
     ContainerError = AppError;
 
-    const { mysql } = await connectToMySQL({ ENV }).catch((mysqlConnectionError) => {
-      throw new AppError({
-        level: ERROR_LEVEL.FATAL,
-        error: mysqlConnectionError,
-        code: APP_ERROR_CODE.API_MYSQL_CONN_START,
-      });
-    });
+    const { mysql } = await connectToMySQL({ ENV, AppError });
     containerMySQL = mysql;
 
     const { fetchUserFromOpenEdx } = fetchUserFromOpenEdxFactory({ mysql, AppError });
@@ -125,7 +118,7 @@ const container = async () => {
     });
 
     const { server } = await startAPIServer({ ENV, apiRouter });
-    apiContainer = server;
+    containerServer = server;
   } catch (containerBootstrapError) {
     if (containerBootstrapError instanceof Error) {
       handleTerminationError({

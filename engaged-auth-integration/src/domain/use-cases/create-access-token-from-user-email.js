@@ -5,7 +5,7 @@ exports.createAccessTokenFromUserEmailFactory = ({ AppError, createOpenEdxUserAc
     createAccessTokenFromUserEmail: async ({ email } = {}) => {
       try {
         const { user } = await fetchUserFromOpenEdx({ email });
-        if (!user) {
+        if (!user || !user.id) {
           throw new AppError({
             code: APP_ERROR_CODE.EDX_USER_NOT_FOUND,
             error: new Error('user not found'),

@@ -1,8 +1,8 @@
 {
   "name": "engaged-auth-integration",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Node project to integrate the Open edX auth with EngagED.",
-  "main": "index.js",
+  "main": "src/bootstrap/api.js",
   "scripts": {
     "dev": "nodemon src/bootstrap/api.js",
     "start": "node src/bootstrap/api.js",

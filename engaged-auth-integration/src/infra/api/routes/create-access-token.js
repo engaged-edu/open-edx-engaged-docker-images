@@ -1,6 +1,6 @@
 const joi = require('@hapi/joi');
 const { ensureParams } = require('../helpers/ensure-params');
-const { APP_ERROR_KIND } = require('../../../constants');
+const { APP_ERROR_KIND, APP_ERROR_CODE } = require('../../../constants');
 
 exports.createAccessTokenAPIRouteFactory = ({ AppError, createAccessTokenFromUserEmail } = {}) => {
   return {
@@ -16,7 +16,11 @@ exports.createAccessTokenAPIRouteFactory = ({ AppError, createAccessTokenFromUse
             },
           },
           (error) => {
-            throw new AppError({ error, kind: APP_ERROR_KIND.VALIDATION });
+            throw new AppError({
+              error,
+              kind: APP_ERROR_KIND.VALIDATION,
+              code: APP_ERROR_CODE.API_PARAMS_VALIDATION,
+            });
           },
         );
 
