@@ -9,8 +9,8 @@ exports.emitEventToEventBridgeFactory = ({ ENV, eventBridge, AppError }) => {
     emitEventToEventBridge: async ({ event, eventType }) => {
       try {
         const eventToSend = {
-          EventBusName: ENV.ENGAGED_AWS_EVENTBRIDGE_BUS_NAME,
-          Source: ENV.ENGAGED_AWS_EVENTBRIDGE_PRODUCER_NAME,
+          EventBusName: ENV.MYSQL_SOURCE_CONNECTOR_AWS_EVENTBRIDGE_BUS_NAME,
+          Source: ENV.MYSQL_SOURCE_CONNECTOR_AWS_EVENTBRIDGE_PRODUCER_NAME,
           Time: new Date(),
           DetailType: eventType,
           Detail: JSON.stringify({

@@ -21,11 +21,11 @@ const getLowDBFilePath = (envMode) => path.join(DATA_DIR[envMode], 'lowdb', 'db.
  * @property {string} OPEN_EDX_MYSQL_DATABASE
  * @property {string} OPEN_EDX_MYSQL_USERNAME
  * @property {string} OPEN_EDX_MYSQL_PASSWORD
- * @property {string} ENGAGED_AWS_ACCESS_KEY
- * @property {string} ENGAGED_AWS_SECRET_KEY
- * @property {string} ENGAGED_AWS_EVENTBRIDGE_PRODUCER_NAME
- * @property {string} ENGAGED_AWS_EVENTBRIDGE_BUS_NAME
- * @property {string} ENGAGED_AWS_EVENTBRIDGE_BUS_REGION
+ * @property {string} AWS_ACCESS_KEY
+ * @property {string} AWS_SECRET_KEY
+ * @property {string} MYSQL_SOURCE_CONNECTOR_AWS_EVENTBRIDGE_PRODUCER_NAME
+ * @property {string} MYSQL_SOURCE_CONNECTOR_AWS_EVENTBRIDGE_BUS_NAME
+ * @property {string} AWS_REGION
  * @property {string} ENGAGED_SERVER_IDENTIFIER
  * @property {string} APM_SERVER_URL
  * @property {string} APM_SECRET_TOKEN
@@ -59,11 +59,11 @@ const loadEnvironmentVariables = ({ bootstrapMode } = {}) => {
       OPEN_EDX_MYSQL_DATABASE: joi.string().default(OPEN_EDX_MYSQL_DEFAULT_SCHEMA),
       OPEN_EDX_MYSQL_USERNAME: joi.string().required(),
       OPEN_EDX_MYSQL_PASSWORD: joi.string().required(),
-      ENGAGED_AWS_ACCESS_KEY: joi.string().required(),
-      ENGAGED_AWS_SECRET_KEY: joi.string().required(),
-      ENGAGED_AWS_EVENTBRIDGE_PRODUCER_NAME: joi.string().default('open-edx-mysql-source-connector'),
-      ENGAGED_AWS_EVENTBRIDGE_BUS_NAME: joi.string().default('open-edx-event-bus'),
-      ENGAGED_AWS_EVENTBRIDGE_BUS_REGION: joi.string().default('sa-east-1'),
+      AWS_ACCESS_KEY: joi.string().required(),
+      AWS_SECRET_KEY: joi.string().required(),
+      MYSQL_SOURCE_CONNECTOR_AWS_EVENTBRIDGE_PRODUCER_NAME: joi.string().default('open-edx-mysql-source-connector'),
+      MYSQL_SOURCE_CONNECTOR_AWS_EVENTBRIDGE_BUS_NAME: joi.string().default('open-edx-event-bus'),
+      AWS_REGION: joi.string().default('sa-east-1'),
       ENGAGED_SERVER_IDENTIFIER: joi.string().required(),
       APM_SERVER_URL: joi.string().required(),
       APM_SECRET_TOKEN: joi.string().required(),
