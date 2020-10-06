@@ -1,0 +1,18 @@
+version: '3.2'
+services:
+  node:
+    container_name: open-edx-mysql-source-connector
+    build: ./
+    restart: always
+    env_file: docker-compose.env
+    networks:
+      - my-bridge-network
+    volumes:
+      - ./data:/var/lib/app-data
+    logging:
+      driver: syslog
+      options:
+        syslog-address: 'tcp://${LOGSTASH_HOST}:${LOGSTASH_PORT}'
+networks:
+  my-bridge-network:
+    external: true

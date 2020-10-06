@@ -1,0 +1,16 @@
+version: '3.2'
+services:
+  node:
+    container_name: engaged_auth_integrator
+    build: ./
+    restart: unless-stopped
+    env_file: docker-compose.env
+    networks:
+      - my-bridge-network
+    logging:
+      driver: syslog
+      options:
+        syslog-address: 'tcp://${LOGSTASH_HOST}:${LOGSTASH_PORT}'
+networks:
+  my-bridge-network:
+    external: true
