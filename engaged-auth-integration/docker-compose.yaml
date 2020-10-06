@@ -1,14 +1,12 @@
 version: '3.2'
 services:
   node:
-    container_name: open-edx-mysql-source-connector
+    container_name: engaged_auth_integrator
     build: ./
-    restart: always
+    restart: unless-stopped
     env_file: docker-compose.env
     networks:
       - my-bridge-network
-    volumes:
-      - ./data:/var/lib/app-data
     logging:
       driver: syslog
       options:

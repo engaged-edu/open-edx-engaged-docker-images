@@ -1,37 +1,36 @@
 {
-  "name": "mysql-source-connector",
-  "version": "1.0.0",
-  "description": "Node project to watch for mysql database changes",
-  "main": "src/bootstrap/worker.js",
+  "name": "engaged-auth-integration",
+  "version": "1.0.2",
+  "description": "Node project to integrate the Open edX auth with EngagED.",
+  "main": "src/bootstrap/api.js",
   "scripts": {
-    "dev": "nodemon src/bootstrap/worker.js",
-    "start": "node src/bootstrap/worker.js",
+    "dev": "nodemon src/bootstrap/api.js",
+    "start": "node src/bootstrap/api.js",
     "clean": "rm -rf node_modules",
     "test": "npm run test:unit",
     "test:unit": "nyc --reporter=html --reporter=text mocha src/**/*.spec.js"
   },
-  "author": "Gustavo Santos",
-  "license": "ISC",
   "dependencies": {
     "@hapi/joi": "17.1.1",
-    "@rodrigogs/mysql-events": "0.6.0",
-    "aws-sdk": "2.723.0",
     "bluebird": "3.7.2",
     "dotenv": "8.2.0",
     "elastic-apm-node": "3.7.0",
-    "lowdb": "1.0.0",
+    "express": "4.17.1",
+    "moment": "2.27.0",
     "mysql": "2.18.1",
     "pino": "6.5.1",
-    "zongji": "0.5.1"
+    "randomstring": "1.1.5"
   },
   "devDependencies": {
     "eslint": "7.5.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-mocha": "8.0.0",
     "eslint-plugin-prettier": "3.1.4",
-    "mocha": "8.1.1",
+    "mocha": "8.1.2",
     "nodemon": "2.0.4",
     "nyc": "15.1.0",
-    "prettier": "2.0.5"
-  }
+    "prettier": "2.1.1"
+  },
+  "author": "EngagED",
+  "license": "ISC"
 }
